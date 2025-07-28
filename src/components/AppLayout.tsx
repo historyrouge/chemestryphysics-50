@@ -71,7 +71,7 @@ import { useTheme } from 'next-themes';
 import { useSocialStore } from '@/stores/socialStore';
 
 const AppLayout = () => {
-  const { logout, currentUser } = useUser();
+  const { logout, profile } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -115,7 +115,24 @@ const AppLayout = () => {
     { href: "/logout", title: "Logout", icon: LogOut, variant: "destructive" as const, onClick: () => logout() },
   ];
 
+  const getCurrentPage = () => {
+    const path = location.pathname;
+    if (path.startsWith('/profile')) return 'profile';
+    if (path.startsWith('/notifications')) return 'notifications';
+    if (path.startsWith('/messages')) return 'messages';
+    if (path.startsWith('/explore')) return 'explore';
+    if (path.startsWith('/bookmarks')) return 'bookmarks';
+    if (path.startsWith('/settings')) return 'settings';
+    if (path.startsWith('/trending')) return 'trending';
+    if (path.startsWith('/analytics')) return 'analytics';
+    if (path.startsWith('/stories')) return 'stories';
+    if (path.startsWith('/search')) return 'search';
+    if (path.startsWith('/livestream')) return 'livestream';
+    return 'home';
+  };
+
   const renderPageTitle = () => {
+    const currentPage = getCurrentPage();
     switch (currentPage) {
       case 'profile': return 'Profile';
       case 'notifications': return 'Notifications';
@@ -134,19 +151,20 @@ const AppLayout = () => {
   };
 
   const renderCurrentPage = () => {
+    const currentPage = getCurrentPage();
     switch (currentPage) {
       case 'profile':
-        return <ProfilePage onNavigateBack={() => setCurrentPage('home')} />;
+        return <ProfilePage onNavigateBack={() => handleNavigation('/home')} />;
       case 'notifications':
-        return <NotificationsPage onNavigateBack={() => setCurrentPage('home')} />;
+        return <NotificationsPage onNavigateBack={() => handleNavigation('/home')} />;
       case 'messages':
-        return <MessagesPage onNavigateBack={() => setCurrentPage('home')} />;
+        return <MessagesPage onNavigateBack={() => handleNavigation('/home')} />;
       case 'explore':
-        return <ExplorePage onNavigateBack={() => setCurrentPage('home')} />;
+        return <ExplorePage onNavigateBack={() => handleNavigation('/home')} />;
       case 'bookmarks':
-        return <BookmarksPage onNavigateBack={() => setCurrentPage('home')} />;
+        return <BookmarksPage onNavigateBack={() => handleNavigation('/home')} />;
       case 'settings':
-        return <SettingsPage onNavigateBack={() => setCurrentPage('home')} onLogout={logout} />;
+        return <SettingsPage onNavigateBack={() => handleNavigation('/home')} onLogout={logout} />;
       case 'trending':
         return <TrendingPage onNavigate={handleNavigation} />;
       case 'analytics':
@@ -183,14 +201,14 @@ const AppLayout = () => {
         {/* User Profile */}
         <div className="p-4 flex items-center gap-3 hover:bg-accent/10 rounded-lg mx-2 cursor-pointer" onClick={() => handleNavigation('profile')}>
           <Avatar className="w-10 h-10 ring-2 ring-accent/20">
-            <AvatarImage src={currentUser?.avatar} alt={currentUser?.displayName} />
+            <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
             <AvatarFallback>
-              {currentUser?.displayName.split(' ').map(n => n[0]).join('')}
+              {profile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold truncate">{currentUser?.displayName}</p>
-            <p className="text-xs text-muted-foreground truncate">@{currentUser?.username}</p>
+            <p className="font-semibold truncate">{profile?.name}</p>
+            <p className="text-xs text-muted-foreground truncate">@{profile?.username}</p>
           </div>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </div>
@@ -242,14 +260,14 @@ const AppLayout = () => {
             {/* User Profile */}
             <div className="p-4 flex items-center gap-3 hover:bg-accent/10 rounded-lg mx-2 cursor-pointer" onClick={() => handleNavigation('profile')}>
               <Avatar className="w-10 h-10 ring-2 ring-accent/20">
-                <AvatarImage src={currentUser?.avatar} alt={currentUser?.displayName} />
+                <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
                 <AvatarFallback>
-                  {currentUser?.displayName.split(' ').map(n => n[0]).join('')}
+                  {profile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold">{currentUser?.displayName}</p>
-                <p className="text-xs text-muted-foreground">@{currentUser?.username}</p>
+                <p className="font-semibold">{profile?.name}</p>
+                <p className="text-xs text-muted-foreground">@{profile?.username}</p>
               </div>
             </div>
             
