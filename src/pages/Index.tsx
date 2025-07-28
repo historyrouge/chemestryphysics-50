@@ -4,7 +4,7 @@ import AuthPage from '@/components/AuthPage';
 import AppLayout from '@/components/AppLayout';
 
 const AppContent = () => {
-  const { currentUser, loading } = useUser();
+  const { user, loading } = useUser();
   
   if (loading) {
     return (
@@ -14,7 +14,7 @@ const AppContent = () => {
     );
   }
   
-  if (!currentUser) {
+  if (!user) {
     return <AuthPage onAuth={() => {}} />;
   }
 

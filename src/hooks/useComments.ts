@@ -49,10 +49,7 @@ export const useComments = (
 
       let query = supabase
         .from('comments')
-        .select(`
-          *,
-          profiles:user_id (*)
-        `)
+        .select('*')
         .is('parent_id', null) // Only fetch top-level comments first
         .order('created_at', { ascending: false })
         .range(currentOffset, currentOffset + COMMENTS_PER_PAGE - 1);
@@ -75,16 +72,20 @@ export const useComments = (
         return;
       }
 
-      // Fetch replies for each comment and check like status
+      // Fetch profiles and replies for each comment
       const commentsWithExtras = await Promise.all(
         (data || []).map(async (comment) => {
+          // Fetch author profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', comment.user_id)
+            .single();
+
           // Fetch replies
           const { data: replies } = await supabase
             .from('comments')
-            .select(`
-              *,
-              profiles:user_id (*)
-            `)
+            .select('*')
             .eq('parent_id', comment.id)
             .order('created_at', { ascending: true });
 
@@ -101,9 +102,16 @@ export const useComments = (
             isLiked = !!likeData;
           }
 
-          // Add like status to replies as well
-          const repliesWithLikes = await Promise.all(
+          // Add profile and like status to replies as well
+          const repliesWithExtras = await Promise.all(
             (replies || []).map(async (reply) => {
+              // Fetch reply author profile
+              const { data: replyProfile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', reply.user_id)
+                .single();
+
               let replyIsLiked = false;
               if (userId) {
                 const { data: replyLikeData } = await supabase
@@ -118,6 +126,7 @@ export const useComments = (
 
               return {
                 ...reply,
+                profiles: replyProfile,
                 is_liked: replyIsLiked,
               };
             })
@@ -125,7 +134,8 @@ export const useComments = (
 
           return {
             ...comment,
-            replies: repliesWithLikes,
+            profiles: profile,
+            replies: repliesWithExtras,
             is_liked: isLiked,
             reply_count: (replies || []).length,
           };
@@ -218,14 +228,18 @@ export const useComments = (
     try {
       const { data, error } = await supabase
         .from('comments')
-        .select(`
-          *,
-          profiles:user_id (*)
-        `)
+        .select('*')
         .eq('id', commentId)
         .single();
 
       if (error || !data) return;
+
+      // Fetch author profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user_id)
+        .single();
 
       let isLiked = false;
       if (userId) {
@@ -241,6 +255,7 @@ export const useComments = (
 
       const newComment = {
         ...data,
+        profiles: profile,
         replies: [],
         is_liked: isLiked,
         reply_count: 0,

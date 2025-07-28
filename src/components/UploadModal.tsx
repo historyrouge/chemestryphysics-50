@@ -14,7 +14,7 @@ interface UploadModalProps {
 }
 
 const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
-  const { createPost, createBit } = useUser();
+  const { createPost } = useUser();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -95,35 +95,30 @@ const UploadModal = ({ isOpen, onClose, type }: UploadModalProps) => {
           return;
         }
         
-        createPost(formData.content, preview || undefined);
-        toast({
-          title: 'Post created!',
-          description: 'Your post has been shared with the cosmic community.',
-        });
-      } else {
-        if (!formData.title.trim() || !formData.file) {
+        const result = await createPost(formData.content, preview || undefined);
+        if (result.success) {
           toast({
-            title: 'Required fields missing',
-            description: 'Please provide a title and video file.',
+            title: 'Post created!',
+            description: 'Your post has been shared with the cosmic community.',
+          });
+        } else {
+          toast({
+            title: 'Failed to create post',
+            description: result.error || 'Something went wrong',
             variant: 'destructive'
           });
           setLoading(false);
           return;
         }
-
-        createBit({
-          title: formData.title,
-          description: formData.description,
-          videoUrl: preview || '',
-          thumbnail: preview || '',
-          duration: 30, // Mock duration
-          tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
-        });
-        
+      } else {
+        // For now, just show a message that bits aren't implemented yet
         toast({
-          title: 'Bit uploaded!',
-          description: 'Your cosmic bit is now live!',
+          title: 'Coming soon!',
+          description: 'Bits feature is not yet implemented.',
+          variant: 'destructive'
         });
+        setLoading(false);
+        return;
       }
 
       // Reset form

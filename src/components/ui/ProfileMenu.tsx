@@ -29,7 +29,7 @@ interface ProfileMenuProps {
 }
 
 export function ProfileMenu({ onNavigate, onLogout }: ProfileMenuProps) {
-  const { currentUser } = useUser();
+  const { profile } = useUser();
 
   return (
     <DropdownMenu>
@@ -39,14 +39,14 @@ export function ProfileMenu({ onNavigate, onLogout }: ProfileMenuProps) {
           className="relative flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-accent/10"
         >
           <Avatar className="h-8 w-8 ring-2 ring-accent/20">
-            <AvatarImage src={currentUser?.avatar} alt={currentUser?.displayName} />
+            <AvatarImage src={profile?.avatar_url || ''} alt={profile?.name} />
             <AvatarFallback className="bg-accent/20 text-accent">
-              {currentUser?.displayName.substring(0, 2)}
+              {profile?.name.substring(0, 2)}
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block text-left">
-            <p className="text-sm font-medium">{currentUser?.displayName}</p>
-            <p className="text-xs text-muted-foreground">@{currentUser?.username}</p>
+            <p className="text-sm font-medium">{profile?.name}</p>
+            <p className="text-xs text-muted-foreground">@{profile?.username}</p>
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -54,10 +54,10 @@ export function ProfileMenu({ onNavigate, onLogout }: ProfileMenuProps) {
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-0.5">
             <div className="flex items-center gap-1">
-              <span className="text-sm font-medium">{currentUser?.displayName}</span>
+              <span className="text-sm font-medium">{profile?.name}</span>
               <Sparkles className="h-3 w-3 text-accent" fill="currentColor" />
             </div>
-            <p className="text-xs text-muted-foreground">@{currentUser?.username}</p>
+            <p className="text-xs text-muted-foreground">@{profile?.username}</p>
           </div>
         </div>
         <DropdownMenuSeparator />

@@ -14,17 +14,16 @@ interface ProfilePageProps {
 }
 
 const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
-  const { currentUser, posts, bits, updateProfile } = useUser();
+  const { profile, posts, updateProfile } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    displayName: currentUser?.displayName || '',
-    bio: currentUser?.bio || '',
-    website: currentUser?.website || '',
-    location: currentUser?.location || ''
+    name: profile?.name || '',
+    bio: profile?.bio || '',
+    website: '',
+    location: ''
   });
 
-  const userPosts = posts.filter(post => post.author.id === currentUser?.id);
-  const userBits = bits.filter(bit => bit.author.id === currentUser?.id);
+  const userPosts = posts.filter(post => post.profiles?.id === profile?.id);
 
   const handleSaveProfile = () => {
     updateProfile(editData);
@@ -35,11 +34,11 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
     // In a real app, this would open a file picker
     const newAvatar = prompt('Enter new avatar URL:');
     if (newAvatar) {
-      updateProfile({ avatar: newAvatar });
+      updateProfile({ avatar_url: newAvatar });
     }
   };
 
-  if (!currentUser) return null;
+  if (!profile) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-space-blue to-space-purple text-foreground">
@@ -58,7 +57,7 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold">{currentUser.displayName}</h1>
+              <h1 className="text-xl font-bold">{profile.name}</h1>
               <p className="text-sm text-muted-foreground">{userPosts.length} posts</p>
             </div>
           </div>
@@ -76,9 +75,9 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               <div className="flex items-start justify-between mb-4">
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-background ring-2 ring-accent/20">
-                    <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
+                    <AvatarImage src={profile.avatar_url || ''} alt={profile.name} />
                     <AvatarFallback className="bg-accent/20 text-accent-foreground text-2xl">
-                      {currentUser.displayName.split(' ').map(n => n[0]).join('')}
+                      {profile.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -104,11 +103,11 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               {isEditing ? (
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="displayName">Display Name</Label>
+                    <Label htmlFor="name">Display Name</Label>
                     <Input
-                      id="displayName"
-                      value={editData.displayName}
-                      onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
+                      id="name"
+                      value={editData.name}
+                      onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
                       className="bg-background/50"
                     />
                   </div>
@@ -147,48 +146,29 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-2xl font-bold">{currentUser.displayName}</h2>
-                    <p className="text-muted-foreground">@{currentUser.username}</p>
+                    <h2 className="text-2xl font-bold">{profile.name}</h2>
+                    <p className="text-muted-foreground">@{profile.username}</p>
                   </div>
                   
-                  {currentUser.bio && (
-                    <p className="text-foreground">{currentUser.bio}</p>
+                  {profile.bio && (
+                    <p className="text-foreground">{profile.bio}</p>
                   )}
                   
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    {currentUser.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{currentUser.location}</span>
-                      </div>
-                    )}
-                    {currentUser.website && (
-                      <div className="flex items-center gap-1">
-                        <Link className="w-4 h-4" />
-                        <a 
-                          href={currentUser.website.startsWith('http') ? currentUser.website : `https://${currentUser.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
-                        >
-                          {currentUser.website}
-                        </a>
-                      </div>
-                    )}
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>Joined {new Date(currentUser.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                      <span>Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
                     </div>
                   </div>
                   
                   <div className="flex gap-6 text-sm">
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
-                      <span><strong>{currentUser.following}</strong> Following</span>
+                      <span><strong>0</strong> Following</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Heart className="w-4 h-4" />
-                      <span><strong>{currentUser.followers}</strong> Followers</span>
+                      <span><strong>0</strong> Followers</span>
                     </div>
                   </div>
                 </div>
@@ -202,9 +182,6 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               <div className="flex gap-8">
                 <button className="px-4 py-3 border-b-2 border-accent text-accent font-semibold">
                   Posts ({userPosts.length})
-                </button>
-                <button className="px-4 py-3 text-muted-foreground hover:text-foreground">
-                  Bits ({userBits.length})
                 </button>
                 <button className="px-4 py-3 text-muted-foreground hover:text-foreground">
                   Media
@@ -228,29 +205,29 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
                     <CardContent className="p-6">
                       <div className="flex gap-3">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={post.author.avatar} alt={post.author.displayName} />
-                          <AvatarFallback>{post.author.displayName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarImage src={post.profiles?.avatar_url || ''} alt={post.profiles?.name} />
+                          <AvatarFallback>{post.profiles?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold">{post.author.displayName}</span>
-                            <span className="text-muted-foreground">@{post.author.username}</span>
+                            <span className="font-semibold">{post.profiles?.name}</span>
+                            <span className="text-muted-foreground">@{post.profiles?.username}</span>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground text-sm">
-                              {new Date(post.createdAt).toLocaleDateString()}
+                              {new Date(post.created_at).toLocaleDateString()}
                             </span>
                           </div>
                           <p className="text-foreground mb-3">{post.content}</p>
-                          {post.image && (
+                          {post.image_url && (
                             <img 
-                              src={post.image} 
+                              src={post.image_url} 
                               alt="Post image"
                               className="rounded-lg max-w-full h-auto mb-3"
                             />
                           )}
                           <div className="flex gap-6 text-muted-foreground text-sm">
                             <span>{post.comments} comments</span>
-                            <span>{post.reposts} reposts</span>
+                            <span>0 reposts</span>
                             <span>{post.likes} likes</span>
                           </div>
                         </div>

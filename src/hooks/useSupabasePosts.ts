@@ -42,10 +42,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
       let query = supabase
         .from('posts')
-        .select(`
-          *,
-          profiles:author_id (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .range(currentOffset, currentOffset + POSTS_PER_PAGE - 1);
 
@@ -61,8 +58,15 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         return;
       }
 
-      const postsWithLikes = await Promise.all(
+      const postsWithExtras = await Promise.all(
         (data || []).map(async (post) => {
+          // Fetch author profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', post.author_id)
+            .single();
+
           let isLiked = false;
           let isBookmarked = false;
 
@@ -90,6 +94,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
           return {
             ...post,
+            profiles: profile,
             is_liked: isLiked,
             is_bookmarked: isBookmarked,
           };
@@ -97,14 +102,14 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
       );
 
       if (reset) {
-        setPosts(postsWithLikes);
+        setPosts(postsWithExtras);
         setOffset(POSTS_PER_PAGE);
       } else {
-        setPosts(prev => [...prev, ...postsWithLikes]);
+        setPosts(prev => [...prev, ...postsWithExtras]);
         setOffset(prev => prev + POSTS_PER_PAGE);
       }
 
-      setHasMore(postsWithLikes.length === POSTS_PER_PAGE);
+      setHasMore(postsWithExtras.length === POSTS_PER_PAGE);
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
@@ -158,14 +163,18 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
     try {
       const { data, error } = await supabase
         .from('posts')
-        .select(`
-          *,
-          profiles:author_id (*)
-        `)
+        .select('*')
         .eq('id', postId)
         .single();
 
       if (error || !data) return;
+
+      // Fetch author profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.author_id)
+        .single();
 
       let isLiked = false;
       let isBookmarked = false;
@@ -192,6 +201,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
       const newPost = {
         ...data,
+        profiles: profile,
         is_liked: isLiked,
         is_bookmarked: isBookmarked,
       };
