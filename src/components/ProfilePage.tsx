@@ -38,7 +38,17 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
     }
   };
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-space-blue to-space-purple text-foreground flex items-center justify-center">
+        <StarField />
+        <div className="relative z-10 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Loading your cosmic profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-space-blue to-space-purple text-foreground">

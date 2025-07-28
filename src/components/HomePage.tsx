@@ -31,7 +31,7 @@ import VideoModal from './VideoModal';
 import { PostCard } from '@/components/PostCard';
 import { BitCard } from '@/components/BitCard';
 import { SearchModal } from '@/components/SearchModal';
-import { NotificationCenter } from '@/components/NotificationCenter';
+import NotificationCenter from '@/components/NotificationCenter';
 import CreatePostModal from '@/components/CreatePostModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -353,10 +353,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
         onClose={() => setIsSearchOpen(false)}
       />
 
-      <NotificationCenter
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-      />
+      <NotificationCenter />
     </div>
   );
 };

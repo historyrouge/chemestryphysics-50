@@ -58,7 +58,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { SearchModal } from '@/components/SearchModal';
-import { NotificationCenter } from '@/components/NotificationCenter';
+import NotificationCenter from '@/components/NotificationCenter';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -396,10 +396,7 @@ const AppLayout = () => {
         onClose={() => setIsSearchOpen(false)}
       />
       
-      <NotificationCenter 
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-      />
+            <NotificationCenter />
     </div>
   );
 };
