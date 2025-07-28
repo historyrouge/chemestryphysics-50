@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Celestial Social Media Design System - Space Theme
+All colors MUST be HSL for consistency and theming support.
+*/
+
+@layer base {
+  :root {
+    /* Cosmic Color Palette */
+    --background: 210 100% 4%;  /* Deep space blue */
+    --foreground: 210 40% 98%;  /* Cosmic white */
+
+    --card: 210 100% 8%;  /* Space card background */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 210 100% 6%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 262 83% 58%;  /* Cosmic purple */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 100% 8%;  /* Dark space */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 210 50% 15%;
+    --muted-foreground: 210 40% 65%;
+
+    --accent: 270 95% 75%;  /* Ethereal accent */
+    --accent-foreground: 210 100% 8%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 270 50% 20%;
+    --input: 210 50% 10%;
+    --ring: 270 95% 75%;
+
+    --radius: 0.75rem;
+
+    /* Celestial Brand Colors */
+    --space-blue: 210 100% 8%;
+    --space-purple: 270 91% 25%;
+    --cosmic-accent: 270 95% 75%;
+    --cosmic-pink: 340 87% 65%;
+    --cosmic-blue: 200 98% 63%;
+    --notification: 0 84% 60%;
+
+    /* Glassmorphism Effects */
+    --glass-bg: 210 100% 8% / 0.7;
+    --glass-border: 270 95% 75% / 0.2;
+    --glass-blur: blur(10px);
+
+    /* Cosmic Gradients */
+    --gradient-space: linear-gradient(135deg, hsl(210 100% 8%), hsl(270 91% 25%));
+    --gradient-cosmic: linear-gradient(to right, hsl(262 83% 58%), hsl(270 91% 25%));
+    --gradient-ethereal: linear-gradient(135deg, hsl(270 95% 75%), hsl(340 87% 65%));
+
+    /* Shadows & Glows */
+    --shadow-cosmic: 0 20px 40px hsl(210 100% 4% / 0.3);
+    --glow-primary: 0 0 20px hsl(262 83% 58% / 0.4);
+    --glow-accent: 0 0 15px hsl(270 95% 75% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Dark mode inherits from cosmic theme */
+  .dark {
+    /* Cosmic theme is inherently dark, so we keep the same values */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: var(--gradient-space);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+}
+
+/* Cosmic Animations & Effects */
+@layer utilities {
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: hsl(var(--foreground));
+    border-radius: 50%;
+    animation: fall linear infinite, twinkle ease-in-out infinite alternate;
+    z-index: 1;
+  }
+
+  @keyframes fall {
+    from { transform: translateY(-100vh); }
+    to { transform: translateY(100vh); }
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--accent) / 0.3); }
+    50% { box-shadow: 0 0 20px hsl(var(--accent) / 0.6); }
+  }
+
+  /* Glass Effect Utilities */
+  .glass-effect {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--shadow-cosmic);
+  }
+
+  .cosmic-glow {
+    box-shadow: var(--glow-primary);
+    transition: var(--transition-smooth);
+  }
+
+  .cosmic-glow:hover {
+    box-shadow: var(--glow-accent);
+    transform: translateY(-2px);
+  }
+
+  /* Animation Classes */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+
+  /* Hover Effects */
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-cosmic);
+  }
+
+  /* Button Variants */
+  .btn-cosmic {
+    background: var(--gradient-cosmic);
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-bounce);
+    box-shadow: var(--glow-primary);
+  }
+
+  .btn-cosmic:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow-accent);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: hsl(var(--accent));
+    border: 1px solid hsl(var(--accent) / 0.3);
+    border-radius: var(--radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+  }
+
+  .btn-ghost:hover {
+    background: hsl(var(--accent) / 0.1);
+    border-color: hsl(var(--accent));
+  }
+  
+  /* Mobile-specific utilities */
+  .mobile-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .snap-scroll {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+  
+  .snap-center {
+    scroll-snap-align: center;
+  }
+  
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  
+  /* Enhanced glass effects for mobile */
+  @media (max-width: 768px) {
+    .glass-effect {
+      background: hsl(var(--glass-bg));
+      backdrop-filter: blur(8px);
+      border: 1px solid hsl(var(--glass-border));
+    }
+  }
+  
+  /* Touch-friendly button sizes */
+  @media (max-width: 768px) {
+    .btn-touch {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "appId": "app.lovable.e9c303690a26401b998be0b500b023ca",
+  "appName": "celestial-social-sphere-54",
+  "webDir": "dist",
+  "server": {
+    "url": "https://e9c30369-0a26-401b-998b-e0b500b023ca.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
