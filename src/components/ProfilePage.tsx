@@ -23,7 +23,7 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
     location: ''
   });
 
-  const userPosts = posts.filter(post => post.profiles?.id === profile?.id);
+  const userPosts = (posts || []).filter(post => post.profiles?.id === profile?.id);
 
   const handleSaveProfile = () => {
     updateProfile(editData);
