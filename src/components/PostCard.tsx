@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import CommentThread from '@/components/CommentThread';
+
 import { useUser } from '@/contexts/UserContext';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -15,10 +15,8 @@ interface PostCardProps {
     id: string;
     content: string;
     created_at: string;
-    likes: number | null;
-    comments: number | null;
     image_url: string | null;
-    author_id: string;
+    user_id: string;
     profiles: {
       id: string;
       username: string;
@@ -26,7 +24,6 @@ interface PostCardProps {
       avatar_url: string | null;
     };
     is_liked?: boolean;
-    is_bookmarked?: boolean;
   };
   onLike?: (postId: string) => void;
   onDelete?: (postId: string) => void;
@@ -35,11 +32,11 @@ interface PostCardProps {
 
 export const PostCard = ({ post, onLike, onDelete, className = '' }: PostCardProps) => {
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked || false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { user, toggleLike } = useUser();
   const { toast } = useToast();
 
-  const isOwner = user?.id === post.author_id;
+  const isOwner = user?.id === post.user_id;
 
   const handleLike = async () => {
     if (onLike) {
@@ -173,7 +170,7 @@ export const PostCard = ({ post, onLike, onDelete, className = '' }: PostCardPro
                     className="text-muted-foreground hover:text-accent transition-colors"
                   >
                     <MessageCircle className="w-4 h-4 mr-1" />
-                    <span className="text-xs">{post.comments || 0}</span>
+                    <span className="text-xs">0</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
@@ -181,7 +178,7 @@ export const PostCard = ({ post, onLike, onDelete, className = '' }: PostCardPro
                     <DialogTitle>Comments</DialogTitle>
                   </DialogHeader>
                   <div className="overflow-y-auto max-h-[60vh]">
-                    <CommentThread postId={post.id} />
+                    <p className="text-center text-muted-foreground">Comments feature coming soon!</p>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -206,7 +203,7 @@ export const PostCard = ({ post, onLike, onDelete, className = '' }: PostCardPro
                 }`}
               >
                 <Heart className={`w-4 h-4 mr-1 ${post.is_liked ? 'fill-current' : ''}`} />
-                <span className="text-xs">{post.likes || 0}</span>
+                <span className="text-xs">0</span>
               </Button>
 
               <Button

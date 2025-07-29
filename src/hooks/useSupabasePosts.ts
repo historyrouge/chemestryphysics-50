@@ -9,7 +9,6 @@ type Profile = Tables<'profiles'>;
 interface PostWithProfile extends Post {
   profiles: Profile;
   is_liked?: boolean;
-  is_bookmarked?: boolean;
 }
 
 interface PostsState {
@@ -64,39 +63,27 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
           const { data: profile } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', post.author_id)
+            .eq('user_id', post.user_id)
             .single();
 
           let isLiked = false;
-          let isBookmarked = false;
 
           if (userId) {
             // Check if user liked this post
             const { data: likeData } = await supabase
-              .from('post_likes')
+              .from('likes')
               .select('id')
               .eq('post_id', post.id)
               .eq('user_id', userId)
               .single();
 
             isLiked = !!likeData;
-
-            // Check if user bookmarked this post
-            const { data: bookmarkData } = await supabase
-              .from('bookmarks')
-              .select('id')
-              .eq('post_id', post.id)
-              .eq('user_id', userId)
-              .single();
-
-            isBookmarked = !!bookmarkData;
           }
 
           return {
             ...post,
             profiles: profile,
             is_liked: isLiked,
-            is_bookmarked: isBookmarked,
           };
         })
       );
@@ -173,37 +160,26 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', data.author_id)
+        .eq('user_id', data.user_id)
         .single();
 
       let isLiked = false;
-      let isBookmarked = false;
 
       if (userId) {
         const { data: likeData } = await supabase
-          .from('post_likes')
+          .from('likes')
           .select('id')
           .eq('post_id', data.id)
           .eq('user_id', userId)
           .single();
 
         isLiked = !!likeData;
-
-        const { data: bookmarkData } = await supabase
-          .from('bookmarks')
-          .select('id')
-          .eq('post_id', data.id)
-          .eq('user_id', userId)
-          .single();
-
-        isBookmarked = !!bookmarkData;
       }
 
       const newPost = {
         ...data,
         profiles: profile,
         is_liked: isLiked,
-        is_bookmarked: isBookmarked,
       };
 
       setPosts(prev => [newPost, ...prev]);
@@ -223,9 +199,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         .insert({
           content: content.trim(),
           image_url: imageUrl,
-          author_id: userId,
-          likes: 0,
-          comments: 0,
+          user_id: userId,
         });
 
       if (error) {
@@ -248,7 +222,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
     try {
       const { data: existingLike } = await supabase
-        .from('post_likes')
+        .from('likes')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', userId)
@@ -257,7 +231,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
       if (existingLike) {
         // Unlike
         await supabase
-          .from('post_likes')
+          .from('likes')
           .delete()
           .eq('post_id', postId)
           .eq('user_id', userId);
@@ -267,22 +241,15 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
           if (post.id === postId) {
             return {
               ...post,
-              likes: Math.max(0, (post.likes || 0) - 1),
               is_liked: false,
             };
           }
           return post;
         }));
-
-        // Update post likes count
-        await supabase
-          .from('posts')
-          .update({ likes: Math.max(0, (posts.find(p => p.id === postId)?.likes || 0) - 1) })
-          .eq('id', postId);
       } else {
         // Like
         await supabase
-          .from('post_likes')
+          .from('likes')
           .insert({ post_id: postId, user_id: userId });
 
         // Update local state
@@ -290,18 +257,11 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
           if (post.id === postId) {
             return {
               ...post,
-              likes: (post.likes || 0) + 1,
               is_liked: true,
             };
           }
           return post;
         }));
-
-        // Update post likes count
-        await supabase
-          .from('posts')
-          .update({ likes: (posts.find(p => p.id === postId)?.likes || 0) + 1 })
-          .eq('id', postId);
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -323,7 +283,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         .from('posts')
         .delete()
         .eq('id', postId)
-        .eq('author_id', userId);
+        .eq('user_id', userId);
 
       if (error) {
         return { success: false, error: error.message };

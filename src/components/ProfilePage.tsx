@@ -236,9 +236,9 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
                             />
                           )}
                           <div className="flex gap-6 text-muted-foreground text-sm">
-                            <span>{post.comments} comments</span>
-                            <span>0 reposts</span>
-                            <span>{post.likes} likes</span>
+                             <span>0 comments</span>
+                             <span>0 reposts</span>
+                             <span>0 likes</span>
                           </div>
                         </div>
                       </div>

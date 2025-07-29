@@ -251,7 +251,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                             className="text-muted-foreground hover:text-accent"
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
-                            {post.comments || 0}
+                            0
                           </Button>
                           
                           <Button
@@ -270,7 +270,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                             className={`${post.is_liked ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
                           >
                             <Heart className={`w-4 h-4 mr-1 ${post.is_liked ? 'fill-current' : ''}`} />
-                            {post.likes || 0}
+                            0
                           </Button>
                           
                           <Button
