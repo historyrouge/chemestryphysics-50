@@ -59,31 +59,28 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
       const postsWithExtras = await Promise.all(
         (data || []).map(async (post) => {
-          // Fetch author profile
+          // Fetch author profile - create default profile if not found
           const { data: profile } = await supabase
             .from('profiles')
             .select('*')
             .eq('user_id', post.user_id)
             .single();
 
-          let isLiked = false;
-
-          if (userId) {
-            // Check if user liked this post
-            const { data: likeData } = await supabase
-              .from('likes')
-              .select('id')
-              .eq('post_id', post.id)
-              .eq('user_id', userId)
-              .single();
-
-            isLiked = !!likeData;
-          }
+          const defaultProfile = {
+            id: post.user_id,
+            user_id: post.user_id,
+            username: 'guest_user',
+            name: 'Guest User',
+            bio: null,
+            avatar_url: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
 
           return {
             ...post,
-            profiles: profile,
-            is_liked: isLiked,
+            profiles: profile || defaultProfile,
+            is_liked: false, // Public mode - no personal likes tracked
           };
         })
       );
@@ -111,87 +108,11 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
 
   useEffect(() => {
     fetchPosts(true);
-  }, [userId]);
-
-  // Set up real-time subscription
-  useEffect(() => {
-    const channel = supabase
-      .channel('posts_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'posts',
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            // Fetch the new post with profile data
-            fetchNewPost(payload.new.id);
-          } else if (payload.eventType === 'DELETE') {
-            setPosts(prev => prev.filter(post => post.id !== payload.old.id));
-          } else if (payload.eventType === 'UPDATE') {
-            setPosts(prev => prev.map(post => 
-              post.id === payload.new.id 
-                ? { ...post, ...payload.new } 
-                : post
-            ));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
-  const fetchNewPost = async (postId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', postId)
-        .single();
-
-      if (error || !data) return;
-
-      // Fetch author profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', data.user_id)
-        .single();
-
-      let isLiked = false;
-
-      if (userId) {
-        const { data: likeData } = await supabase
-          .from('likes')
-          .select('id')
-          .eq('post_id', data.id)
-          .eq('user_id', userId)
-          .single();
-
-        isLiked = !!likeData;
-      }
-
-      const newPost = {
-        ...data,
-        profiles: profile,
-        is_liked: isLiked,
-      };
-
-      setPosts(prev => [newPost, ...prev]);
-    } catch (error) {
-      console.error('Error fetching new post:', error);
-    }
-  };
-
   const createPost = async (content: string, imageUrl?: string): Promise<{ success: boolean; error?: string }> => {
-    if (!userId) {
-      return { success: false, error: 'Not authenticated' };
-    }
+    // For demo purposes, we'll create a guest post
+    const guestUserId = 'guest-user-' + Date.now();
 
     try {
       const { error } = await supabase
@@ -199,7 +120,7 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         .insert({
           content: content.trim(),
           image_url: imageUrl,
-          user_id: userId,
+          user_id: guestUserId,
         });
 
       if (error) {
@@ -211,6 +132,8 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         description: 'Post created successfully!',
       });
 
+      // Refresh posts to show the new one
+      await refresh();
       return { success: true };
     } catch (error) {
       return { success: false, error: 'An unexpected error occurred' };
@@ -218,72 +141,24 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
   };
 
   const toggleLike = async (postId: string): Promise<void> => {
-    if (!userId) return;
-
-    try {
-      const { data: existingLike } = await supabase
-        .from('likes')
-        .select('id')
-        .eq('post_id', postId)
-        .eq('user_id', userId)
-        .single();
-
-      if (existingLike) {
-        // Unlike
-        await supabase
-          .from('likes')
-          .delete()
-          .eq('post_id', postId)
-          .eq('user_id', userId);
-
-        // Update local state
-        setPosts(prev => prev.map(post => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              is_liked: false,
-            };
-          }
-          return post;
-        }));
-      } else {
-        // Like
-        await supabase
-          .from('likes')
-          .insert({ post_id: postId, user_id: userId });
-
-        // Update local state
-        setPosts(prev => prev.map(post => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              is_liked: true,
-            };
-          }
-          return post;
-        }));
+    // In public mode, just show visual feedback without persisting
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          is_liked: !post.is_liked,
+        };
       }
-    } catch (error) {
-      console.error('Error toggling like:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update like',
-        variant: 'destructive',
-      });
-    }
+      return post;
+    }));
   };
 
   const deletePost = async (postId: string): Promise<{ success: boolean; error?: string }> => {
-    if (!userId) {
-      return { success: false, error: 'Not authenticated' };
-    }
-
     try {
       const { error } = await supabase
         .from('posts')
         .delete()
-        .eq('id', postId)
-        .eq('user_id', userId);
+        .eq('id', postId);
 
       if (error) {
         return { success: false, error: error.message };
@@ -294,6 +169,8 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         description: 'Post deleted successfully!',
       });
 
+      // Remove from local state
+      setPosts(prev => prev.filter(post => post.id !== postId));
       return { success: true };
     } catch (error) {
       return { success: false, error: 'An unexpected error occurred' };

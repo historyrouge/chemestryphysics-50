@@ -10,7 +10,6 @@ type Post = Tables<'posts'>;
 interface PostWithProfile extends Post {
   profiles: Profile;
   is_liked?: boolean;
-  is_bookmarked?: boolean;
 }
 
 interface UserContextType {
@@ -51,17 +50,11 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const {
-    user,
-    profile,
-    session,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    updateProfile: updateUserProfile,
-    resetPassword,
-  } = useSupabaseAuth();
+  // Mock user and authentication functions for public mode
+  const mockUser = null;
+  const mockProfile = null;
+  const mockSession = null;
+  const loading = false;
 
   const {
     posts,
@@ -72,13 +65,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     deletePost,
     loadMore: loadMorePosts,
     refresh: refreshPosts,
-  } = useSupabasePosts(user?.id);
+  } = useSupabasePosts();
 
   const value: UserContextType = {
-    // Auth state
-    user,
-    profile,
-    session,
+    // Auth state - all null/false for public mode
+    user: mockUser,
+    profile: mockProfile,
+    session: mockSession,
     loading,
     
     // Posts state
@@ -86,12 +79,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     postsLoading,
     hasMorePosts,
     
-    // Auth actions
-    login: signIn,
-    register: signUp,
-    logout: signOut,
-    updateProfile: updateUserProfile,
-    resetPassword,
+    // Auth actions - mock functions for public mode
+    login: async () => ({ success: false, error: 'Public mode - no authentication' }),
+    register: async () => ({ success: false, error: 'Public mode - no authentication' }),
+    logout: async () => {},
+    updateProfile: async () => ({ success: false, error: 'Public mode - no authentication' }),
+    resetPassword: async () => ({ success: false, error: 'Public mode - no authentication' }),
     
     // Post actions
     createPost,
