@@ -51,9 +51,26 @@ export interface Comment {
   replies?: Comment[];
 }
 
+export interface Story {
+  id: string;
+  title: string;
+  content?: string;
+  mediaUrl?: string;
+  author: {
+    name: string;
+    avatar: string;
+    username: string;
+  };
+  timestamp: string;
+  expiresAt: string;
+  views: number;
+  isOwn?: boolean;
+}
+
 interface SocialStore {
   posts: Post[];
   bits: Bit[];
+  stories: Story[];
   bookmarkedPosts: string[];
   bookmarkedBits: string[];
   
@@ -67,6 +84,7 @@ interface SocialStore {
   addCommentToBit: (bitId: string, content: string) => void;
   sharePost: (postId: string) => void;
   shareBit: (bitId: string) => void;
+  addStory: (story: Omit<Story, 'id' | 'timestamp' | 'expiresAt'>) => void;
   
   // Initialize with mock data
   initializeMockData: () => void;
@@ -75,6 +93,7 @@ interface SocialStore {
 export const useSocialStore = create<SocialStore>((set, get) => ({
   posts: [],
   bits: [],
+  stories: [],
   bookmarkedPosts: [],
   bookmarkedBits: [],
 
@@ -217,6 +236,19 @@ export const useSocialStore = create<SocialStore>((set, get) => ({
     }));
   },
 
+  addStory: (storyData: Omit<Story, 'id' | 'timestamp' | 'expiresAt'>) => {
+    const newStory: Story = {
+      ...storyData,
+      id: Date.now().toString(),
+      timestamp: 'now',
+      expiresAt: '24h remaining',
+    };
+
+    set((state) => ({
+      stories: [newStory, ...state.stories],
+    }));
+  },
+
   initializeMockData: () => {
     const mockPosts: Post[] = [
       {
@@ -300,6 +332,24 @@ export const useSocialStore = create<SocialStore>((set, get) => ({
       },
     ];
 
-    set({ posts: mockPosts, bits: mockBits });
+    const mockStories: Story[] = [
+      {
+        id: "1",
+        title: "Amazing Aurora Display",
+        content: "Captured this incredible aurora display last night!",
+        mediaUrl: "/placeholder.svg",
+        author: {
+          name: "Cosmic Explorer",
+          avatar: "/placeholder.svg",
+          username: "cosmicexplorer",
+        },
+        timestamp: "2h ago",
+        expiresAt: "22h remaining",
+        views: 1250,
+        isOwn: false,
+      },
+    ];
+
+    set({ posts: mockPosts, bits: mockBits, stories: mockStories });
   },
 }));

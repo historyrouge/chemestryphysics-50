@@ -33,12 +33,16 @@ import { BitCard } from '@/components/BitCard';
 import { SearchModal } from '@/components/SearchModal';
 import NotificationCenter from '@/components/NotificationCenter';
 import CreatePostModal from '@/components/CreatePostModal';
+import UploadOptionsMenu from '@/components/UploadOptionsMenu';
+import BitUploadModal from '@/components/BitUploadModal';
+import StoryUploadModal from '@/components/StoryUploadModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useUser } from '@/contexts/UserContext';
+import { useSocialStore } from '@/stores/socialStore';
 import { formatDistanceToNow } from 'date-fns';
 
 interface HomePageProps {
@@ -61,6 +65,8 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
     logout 
   } = useUser();
   
+  const { bits, initializeMockData } = useSocialStore();
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [quickPostText, setQuickPostText] = useState('');
@@ -69,6 +75,9 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
+  const [isBitUploadOpen, setIsBitUploadOpen] = useState(false);
+  const [isStoryUploadOpen, setIsStoryUploadOpen] = useState(false);
 
   const handleQuickPost = async () => {
     if (quickPostText.trim()) {
@@ -87,6 +96,20 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
   const handleLogout = async () => {
     await logout();
     if (onLogout) onLogout();
+  };
+
+  const handleUploadOption = (type: 'post' | 'bit' | 'story') => {
+    switch (type) {
+      case 'post':
+        setIsCreatePostOpen(true);
+        break;
+      case 'bit':
+        setIsBitUploadOpen(true);
+        break;
+      case 'story':
+        setIsStoryUploadOpen(true);
+        break;
+    }
   };
 
   useEffect(() => {
@@ -111,6 +134,11 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMorePosts, postsLoading]);
+
+  useEffect(() => {
+    // Initialize mock data for bits and stories
+    initializeMockData();
+  }, [initializeMockData]);
 
   return (
     <div className="min-h-screen relative">
@@ -206,6 +234,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
             </div>
           ) : (
             <>
+              {/* Posts */}
               {posts.map((post) => (
                 <Card key={post.id} className="glass-effect">
                   <CardContent className="p-4">
@@ -286,6 +315,60 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Bits */}
+              {bits.map((bit) => (
+                <Card key={bit.id} className="glass-effect">
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <video 
+                        src={bit.videoUrl}
+                        poster={bit.thumbnail}
+                        className="w-full h-64 object-cover rounded-t-lg"
+                        onClick={() => handleBitClick(bit)}
+                        muted
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleBitClick(bit)}
+                        className="absolute inset-0 bg-black/20 hover:bg-black/40 text-white"
+                      >
+                        <Play className="w-12 h-12" />
+                      </Button>
+                      
+                      {/* Bit overlay info */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={bit.author.avatar} />
+                            <AvatarFallback className="bg-gradient-cosmic text-white text-xs">
+                              {bit.author.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-white font-medium text-sm">{bit.author.name}</span>
+                          <span className="text-white/70 text-xs">@{bit.author.username}</span>
+                        </div>
+                        <h3 className="text-white font-semibold mb-1">{bit.title}</h3>
+                        {bit.description && (
+                          <p className="text-white/80 text-sm mb-2 line-clamp-2">{bit.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-white/70 text-xs">
+                          <span className="flex items-center gap-1">
+                            <Video className="w-3 h-3" />
+                            {bit.duration}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3" />
+                            {bit.likes}
+                          </span>
+                          <span>{bit.views} views</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
               
               {/* Load More */}
               {hasMorePosts && (
@@ -330,16 +413,32 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
 
       {/* Floating Action Button */}
       <Button
-        onClick={() => setIsCreatePostOpen(true)}
+        onClick={() => setIsUploadMenuOpen(true)}
         className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-gradient-cosmic hover:shadow-glow-primary z-40 md:hidden"
       >
         <Plus className="w-6 h-6" />
       </Button>
 
       {/* Modals */}
+      <UploadOptionsMenu
+        isOpen={isUploadMenuOpen}
+        onClose={() => setIsUploadMenuOpen(false)}
+        onSelectOption={handleUploadOption}
+      />
+
       <CreatePostModal
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
+      />
+
+      <BitUploadModal
+        isOpen={isBitUploadOpen}
+        onClose={() => setIsBitUploadOpen(false)}
+      />
+
+      <StoryUploadModal
+        isOpen={isStoryUploadOpen}
+        onClose={() => setIsStoryUploadOpen(false)}
       />
 
       <VideoModal
