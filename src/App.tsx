@@ -27,26 +27,7 @@ import AuthPage from "./components/AuthPage";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { user, loading } = useUser();
-
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show auth page if not authenticated
-  if (!user) {
-    return <AuthPage />;
-  }
-
-  // Show main app if authenticated
+  // Always show main app (public mode)
   return (
     <BrowserRouter>
       <Routes>
