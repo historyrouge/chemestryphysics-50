@@ -311,7 +311,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
               {posts.length === 0 && !postsLoading && (
                 <div className="text-center py-12">
                   <Star className="w-12 h-12 mx-auto mb-4 text-accent" />
-                  <h3 className="text-lg font-semibold text-accent mb-2">Welcome to Celestial!</h3>
+                  <h3 className="text-lg font-semibold text-accent mb-2">Welcome to Neon!</h3>
                   <p className="text-muted-foreground mb-4">
                     Start your cosmic journey by creating your first post or following other users.
                   </p>
