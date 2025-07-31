@@ -195,7 +195,7 @@ const AppLayout = () => {
       <aside className="fixed top-0 left-0 z-30 h-screen w-60 hidden md:flex flex-col glass-effect border-r border-border">
         <div className="p-4 flex items-center gap-3">
           <Star className="w-8 h-8 text-accent" fill="currentColor" />
-          <span className="text-xl font-bold text-accent">Celestial</span>
+          <span className="text-xl font-bold text-accent">Neon</span>
         </div>
         
         {/* User Profile */}
@@ -250,7 +250,7 @@ const AppLayout = () => {
             <div className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Star className="w-8 h-8 text-accent" fill="currentColor" />
-                <span className="text-xl font-bold text-accent">Celestial</span>
+                <span className="text-xl font-bold text-accent">Neon</span>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)}>
                 <X className="w-5 h-5 text-accent" />
@@ -323,7 +323,7 @@ const AppLayout = () => {
               <h1 className="text-xl font-bold hidden md:block">{renderPageTitle()}</h1>
               <div className="md:hidden flex items-center gap-3">
                 <Star className="w-7 h-7 text-accent" fill="currentColor" />
-                <span className="text-lg font-bold text-accent">Celestial</span>
+                <span className="text-lg font-bold text-accent">Neon</span>
               </div>
             </div>
             
@@ -331,7 +331,7 @@ const AppLayout = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search Celestial..."
+                  placeholder="Search Neon..."
                   className="pl-10 bg-input/50 border-border focus:border-accent cursor-pointer"
                   onClick={() => setIsSearchOpen(true)}
                   readOnly
