@@ -42,7 +42,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useUser } from '@/contexts/UserContext';
-import { useSocialStore } from '@/stores/socialStore';
+import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 
 interface HomePageProps {
@@ -65,7 +65,11 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
     logout 
   } = useUser();
   
-  const { bits, initializeMockData } = useSocialStore();
+  // Real data state for bits and stories
+  const [bits, setBits] = useState<any[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
+  const [bitsLoading, setBitsLoading] = useState(true);
+  const [storiesLoading, setStoriesLoading] = useState(true);
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
@@ -135,10 +139,102 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMorePosts, postsLoading]);
 
+  // Fetch real bits data from database
+  const fetchBits = async () => {
+    try {
+      setBitsLoading(true);
+      
+      // Direct query to bits table
+      const { data: bitsData, error: bitsError } = await supabase
+        .from('bits' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (bitsError) {
+        console.log('No bits found or error fetching bits:', bitsError);
+        setBits([]);
+        setBitsLoading(false);
+        return;
+      }
+
+      // Transform bits data for display
+      const transformedBits = (bitsData || []).map((bit: any) => ({
+        id: bit.id,
+        title: bit.title,
+        description: bit.description,
+        videoUrl: bit.video_url,
+        thumbnail: bit.video_url, // Using video URL as thumbnail for now
+        duration: '0:30', // Default duration
+        views: 1250, // Mock view count
+        likes: 89, // Mock like count
+        comments: [],
+        shares: 12,
+        isLiked: false,
+        isBookmarked: false,
+        author: {
+          name: 'Guest User',
+          avatar: '/placeholder.svg',
+          username: 'guest_user',
+        },
+      }));
+
+      setBits(transformedBits);
+    } catch (error) {
+      console.log('Error fetching bits:', error);
+      setBits([]);
+    } finally {
+      setBitsLoading(false);
+    }
+  };
+
+  // Fetch real stories data from database
+  const fetchStories = async () => {
+    try {
+      setStoriesLoading(true);
+      
+      // Direct query to stories table
+      const { data: storiesData, error: storiesError } = await supabase
+        .from('stories' as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (storiesError) {
+        console.log('No stories found or error fetching stories:', storiesError);
+        setStories([]);
+        setStoriesLoading(false);
+        return;
+      }
+
+      // Transform stories data for display
+      const transformedStories = (storiesData || []).map((story: any) => ({
+        id: story.id,
+        title: story.title,
+        content: story.content,
+        mediaUrl: story.media_url,
+        author: {
+          name: 'Guest User',
+          avatar: '/placeholder.svg',
+          username: 'guest_user',
+        },
+        timestamp: formatDistanceToNow(new Date(story.created_at), { addSuffix: true }),
+        expiresAt: '24h remaining',
+        views: 1250,
+        isOwn: false,
+      }));
+
+      setStories(transformedStories);
+    } catch (error) {
+      console.log('Error fetching stories:', error);
+      setStories([]);
+    } finally {
+      setStoriesLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Initialize mock data for bits and stories
-    initializeMockData();
-  }, [initializeMockData]);
+    fetchBits();
+    fetchStories();
+  }, []);
 
   return (
     <div className="min-h-screen relative">
@@ -227,7 +323,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
 
         {/* Feed */}
         <div className="space-y-4">
-          {postsLoading && posts.length === 0 ? (
+          {(postsLoading || bitsLoading) && posts.length === 0 && bits.length === 0 ? (
             <div className="text-center py-8">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-accent" />
               <p className="text-muted-foreground">Loading your cosmic feed...</p>
@@ -236,7 +332,7 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
             <>
               {/* Posts */}
               {posts.map((post) => (
-                <Card key={post.id} className="glass-effect">
+                <Card key={`post-${post.id}`} className="glass-effect">
                   <CardContent className="p-4">
                     <div className="flex gap-3">
                       <Avatar className="w-10 h-10 flex-shrink-0">
@@ -318,15 +414,16 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
 
               {/* Bits */}
               {bits.map((bit) => (
-                <Card key={bit.id} className="glass-effect">
+                <Card key={`bit-${bit.id}`} className="glass-effect">
                   <CardContent className="p-0">
                     <div className="relative">
                       <video 
                         src={bit.videoUrl}
                         poster={bit.thumbnail}
-                        className="w-full h-64 object-cover rounded-t-lg"
+                        className="w-full h-64 object-cover rounded-t-lg cursor-pointer"
                         onClick={() => handleBitClick(bit)}
                         muted
+                        preload="metadata"
                       />
                       <Button
                         variant="ghost"
@@ -391,12 +488,12 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                 </div>
               )}
               
-              {posts.length === 0 && !postsLoading && (
+              {posts.length === 0 && bits.length === 0 && !postsLoading && !bitsLoading && (
                 <div className="text-center py-12">
                   <Star className="w-12 h-12 mx-auto mb-4 text-accent" />
                   <h3 className="text-lg font-semibold text-accent mb-2">Welcome to Neon!</h3>
                   <p className="text-muted-foreground mb-4">
-                    Start your cosmic journey by creating your first post or following other users.
+                    Start your cosmic journey by creating your first post, bit, or story.
                   </p>
                   <Button
                     onClick={() => setIsCreatePostOpen(true)}
@@ -434,11 +531,13 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
       <BitUploadModal
         isOpen={isBitUploadOpen}
         onClose={() => setIsBitUploadOpen(false)}
+        onSuccess={fetchBits}
       />
 
       <StoryUploadModal
         isOpen={isStoryUploadOpen}
         onClose={() => setIsStoryUploadOpen(false)}
+        onSuccess={fetchStories}
       />
 
       <VideoModal

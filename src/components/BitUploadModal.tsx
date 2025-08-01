@@ -6,16 +6,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext';
-import { useSocialStore } from '@/stores/socialStore';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface BitUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void; // Callback to refresh data
 }
 
-const BitUploadModal = ({ isOpen, onClose }: BitUploadModalProps) => {
+const BitUploadModal = ({ isOpen, onClose, onSuccess }: BitUploadModalProps) => {
   const { user, profile } = useUser();
-  const { bits } = useSocialStore();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -55,48 +57,61 @@ const BitUploadModal = ({ isOpen, onClose }: BitUploadModalProps) => {
     setIsLoading(true);
 
     try {
-      // For demo purposes, we'll create a bit entry with placeholder video URL
+      // For demo purposes, we'll create a bit entry with the blob URL
       // In a real app, you would upload the file to storage first
-      const videoUrl = previewUrl; // This would be the actual uploaded file URL
+      const videoUrl = previewUrl; // Using blob URL for demo
       
       const tagsArray = formData.tags
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      // For now, just add to the local store (mock data)
-      // In a real app, this would be saved to the database
-      const newBit = {
-        id: Date.now().toString(),
-        title: formData.title,
-        description: formData.description,
-        videoUrl: videoUrl,
-        thumbnail: videoUrl, // Use video as thumbnail for now
-        duration: "0:30", // Mock duration
-        views: 0,
-        likes: 0,
-        comments: [],
-        shares: 0,
-        isLiked: false,
-        isBookmarked: false,
-        author: {
-          name: profile?.name || profile?.username || 'User',
-          avatar: profile?.avatar_url || '/placeholder.svg',
-          username: profile?.username || 'user',
-        }
-      };
+      // Create a guest user ID for demo
+      const guestUserId = 'guest-user-' + Date.now();
 
-      // Add to store (this would be replaced with actual database call)
-      console.log('New bit created:', newBit);
+      // Save to database
+      const { error } = await supabase
+        .from('bits' as any)
+        .insert({
+          title: formData.title,
+          description: formData.description || null,
+          video_url: videoUrl,
+          user_id: guestUserId,
+          category: formData.category || null,
+          tags: tagsArray.length > 0 ? tagsArray : null,
+        });
+
+      if (error) {
+        console.error('Error saving bit:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to upload bit to database',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Bit uploaded successfully!',
+      });
 
       // Reset form
       setFormData({ title: '', description: '', tags: '', category: '' });
       setSelectedFile(null);
       setPreviewUrl('');
+      
+      // Call success callback to refresh data
+      if (onSuccess) onSuccess();
+      
       onClose();
     } catch (error) {
       console.error('Error uploading bit:', error);
-      alert('Failed to upload bit');
+      toast({
+        title: 'Error',
+        description: 'Failed to upload bit',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }

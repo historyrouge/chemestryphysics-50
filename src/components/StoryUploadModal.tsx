@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/contexts/UserContext';
-import { useSocialStore } from '@/stores/socialStore';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface StoryUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void; // Callback to refresh data
 }
 
-const StoryUploadModal = ({ isOpen, onClose }: StoryUploadModalProps) => {
+const StoryUploadModal = ({ isOpen, onClose, onSuccess }: StoryUploadModalProps) => {
   const { user, profile } = useUser();
-  const { addStory } = useSocialStore();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState('');
 
@@ -24,26 +26,48 @@ const StoryUploadModal = ({ isOpen, onClose }: StoryUploadModalProps) => {
     setIsLoading(true);
 
     try {
-      // Add story to local store (mock data for now)
-      addStory({
-        title: title.trim(),
-        content: undefined,
-        mediaUrl: '/placeholder.svg',
-        author: {
-          name: profile?.name || profile?.username || 'User',
-          avatar: profile?.avatar_url || '/placeholder.svg',
-          username: profile?.username || 'user',
-        },
-        views: 0,
-        isOwn: true,
+      // Create a guest user ID for demo
+      const guestUserId = 'guest-user-' + Date.now();
+
+      // Save story to database
+      const { error } = await supabase
+        .from('stories' as any)
+        .insert({
+          title: title.trim(),
+          content: null,
+          media_url: null,
+          user_id: guestUserId,
+        });
+
+      if (error) {
+        console.error('Error saving story:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to create story',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Story created successfully!',
       });
 
       // Reset form
       setTitle('');
+      
+      // Call success callback to refresh data
+      if (onSuccess) onSuccess();
+      
       onClose();
     } catch (error) {
       console.error('Error creating story:', error);
-      alert('Failed to create story');
+      toast({
+        title: 'Error',
+        description: 'Failed to create story',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
