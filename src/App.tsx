@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { UserProvider, useUser } from "@/contexts/UserContext";
+import { Star } from "lucide-react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import HomePage from "./components/HomePage";
@@ -23,11 +24,35 @@ import CollaborationPage from "./components/CollaborationPage";
 import CreatorStudioPage from "./components/CreatorStudioPage";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./components/AuthPage";
+import StarField from "./components/StarField";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  // Always show main app (public mode)
+  const { user, loading } = useUser();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <StarField />
+        <div className="glass-effect p-8 rounded-3xl relative z-10 flex items-center gap-3">
+          <Star className="w-8 h-8 text-accent animate-pulse" fill="currentColor" />
+          <span className="text-xl font-bold text-accent">Loading Celestial...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="*" element={<AuthPage />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>

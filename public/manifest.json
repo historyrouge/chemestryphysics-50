@@ -1,0 +1,19 @@
+{
+  "name": "Celestial - Social Media Universe",
+  "short_name": "Celestial",
+  "description": "Join the universe of social media with Celestial",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["social", "entertainment", "communication"],
+  "lang": "en-US"
+}

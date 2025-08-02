@@ -26,17 +26,24 @@ const StoryUploadModal = ({ isOpen, onClose, onSuccess }: StoryUploadModalProps)
     setIsLoading(true);
 
     try {
-      // Create a guest user ID for demo
-      const guestUserId = 'guest-user-' + Date.now();
+      // Use authenticated user ID or require authentication
+      if (!user) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to create stories',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       // Save story to database
       const { error } = await supabase
-        .from('stories' as any)
+        .from('stories')
         .insert({
           title: title.trim(),
           content: null,
           media_url: null,
-          user_id: guestUserId,
+          user_id: user.id,
         });
 
       if (error) {
