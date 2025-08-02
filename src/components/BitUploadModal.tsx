@@ -66,17 +66,24 @@ const BitUploadModal = ({ isOpen, onClose, onSuccess }: BitUploadModalProps) => 
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      // Create a guest user ID for demo
-      const guestUserId = 'guest-user-' + Date.now();
+      // Use authenticated user ID or require authentication
+      if (!user) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to upload bits',
+          variant: 'destructive',
+        });
+        return;
+      }
 
       // Save to database
       const { error } = await supabase
-        .from('bits' as any)
+        .from('bits')
         .insert({
           title: formData.title,
           description: formData.description || null,
           video_url: videoUrl,
-          user_id: guestUserId,
+          user_id: user.id,
           category: formData.category || null,
           tags: tagsArray.length > 0 ? tagsArray : null,
         });

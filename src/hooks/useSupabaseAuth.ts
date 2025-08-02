@@ -73,8 +73,8 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
@@ -166,7 +166,7 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
           ...updates,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (error) {
         return { success: false, error: error.message };
