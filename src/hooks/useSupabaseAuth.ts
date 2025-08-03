@@ -31,14 +31,25 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
 
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+      console.log('Getting initial session...');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Initial session result:', { session, error });
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          if (session?.user) {
+            console.log('Fetching profile for user:', session.user.id);
+            await fetchProfile(session.user.id);
+          }
+          console.log('Setting loading to false');
+          setLoading(false);
         }
-        setLoading(false);
+      } catch (err) {
+        console.error('Error getting initial session:', err);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -46,18 +57,23 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('Auth state change:', { event, session });
         if (!mounted) return;
 
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          // Use setTimeout to prevent blocking the auth state change
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
 
+        console.log('Setting loading to false from auth state change');
         setLoading(false);
       }
     );
@@ -70,11 +86,14 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for userId:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
+
+      console.log('Profile fetch result:', { data, error });
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
@@ -82,6 +101,7 @@ export const useSupabaseAuth = (): AuthState & AuthActions => {
       }
 
       setProfile(data || null);
+      console.log('Profile set to:', data || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
