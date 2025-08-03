@@ -201,14 +201,14 @@ const AppLayout = () => {
         {/* User Profile */}
         <div className="p-4 flex items-center gap-3 hover:bg-accent/10 rounded-lg mx-2 cursor-pointer" onClick={() => handleNavigation('profile')}>
           <Avatar className="w-10 h-10 ring-2 ring-accent/20">
-            <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+            <AvatarImage src={profile?.avatar_url} alt={profile?.name || 'User'} />
             <AvatarFallback>
-              {profile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+              {profile?.name?.split(' ').map(n => n[0]).join('') || profile?.username?.substring(0, 1) || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold truncate">{profile?.name}</p>
-            <p className="text-xs text-muted-foreground truncate">@{profile?.username}</p>
+            <p className="font-semibold truncate">{profile?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground truncate">@{profile?.username || 'user'}</p>
           </div>
           <ChevronDown className="w-4 h-4 text-muted-foreground" />
         </div>
@@ -260,14 +260,14 @@ const AppLayout = () => {
             {/* User Profile */}
             <div className="p-4 flex items-center gap-3 hover:bg-accent/10 rounded-lg mx-2 cursor-pointer" onClick={() => handleNavigation('profile')}>
               <Avatar className="w-10 h-10 ring-2 ring-accent/20">
-                <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                <AvatarImage src={profile?.avatar_url} alt={profile?.name || 'User'} />
                 <AvatarFallback>
-                  {profile?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                  {profile?.name?.split(' ').map(n => n[0]).join('') || profile?.username?.substring(0, 1) || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold">{profile?.name}</p>
-                <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+                <p className="font-semibold">{profile?.name || 'User'}</p>
+                <p className="text-xs text-muted-foreground">@{profile?.username || 'user'}</p>
               </div>
             </div>
             

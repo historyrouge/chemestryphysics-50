@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Link, MapPin, Edit, Camera, Users, Heart } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,23 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
   const { profile, posts, updateProfile } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    name: profile?.name || '',
-    bio: profile?.bio || '',
+    name: '',
+    bio: '',
     website: '',
     location: ''
   });
+
+  // Update editData when profile loads
+  useEffect(() => {
+    if (profile) {
+      setEditData({
+        name: profile.name || '',
+        bio: profile.bio || '',
+        website: '',
+        location: ''
+      });
+    }
+  }, [profile]);
 
   const userPosts = (posts || []).filter(post => post.profiles?.id === profile?.id);
 
@@ -67,7 +79,7 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold">{profile.name}</h1>
+              <h1 className="text-xl font-bold">{profile.name || 'User'}</h1>
               <p className="text-sm text-muted-foreground">{userPosts.length} posts</p>
             </div>
           </div>
@@ -85,9 +97,9 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               <div className="flex items-start justify-between mb-4">
                 <div className="relative">
                   <Avatar className="w-24 h-24 border-4 border-background ring-2 ring-accent/20">
-                    <AvatarImage src={profile.avatar_url || ''} alt={profile.name} />
+                    <AvatarImage src={profile.avatar_url || ''} alt={profile.name || 'User'} />
                     <AvatarFallback className="bg-accent/20 text-accent-foreground text-2xl">
-                      {profile.name.split(' ').map(n => n[0]).join('')}
+                      {profile.name?.split(' ').map(n => n[0]).join('') || profile.username?.substring(0, 1) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -156,8 +168,8 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <h2 className="text-2xl font-bold">{profile.name}</h2>
-                    <p className="text-muted-foreground">@{profile.username}</p>
+                    <h2 className="text-2xl font-bold">{profile.name || 'User'}</h2>
+                    <p className="text-muted-foreground">@{profile.username || 'user'}</p>
                   </div>
                   
                   {profile.bio && (
@@ -215,13 +227,13 @@ const ProfilePage = ({ onNavigateBack }: ProfilePageProps) => {
                     <CardContent className="p-6">
                       <div className="flex gap-3">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={post.profiles?.avatar_url || ''} alt={post.profiles?.name} />
-                          <AvatarFallback>{post.profiles?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarImage src={post.profiles?.avatar_url || ''} alt={post.profiles?.name || 'User'} />
+                          <AvatarFallback>{post.profiles?.name?.split(' ').map(n => n[0]).join('') || post.profiles?.username?.substring(0, 1) || 'U'}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold">{post.profiles?.name}</span>
-                            <span className="text-muted-foreground">@{post.profiles?.username}</span>
+                            <span className="font-semibold">{post.profiles?.name || 'User'}</span>
+                            <span className="text-muted-foreground">@{post.profiles?.username || 'user'}</span>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground text-sm">
                               {new Date(post.created_at).toLocaleDateString()}
