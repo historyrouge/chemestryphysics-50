@@ -29,7 +29,7 @@ import StarField from "./components/StarField";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  const { user, loading } = useUser();
+  const { user, loading, logout } = useUser();
 
   if (loading) {
     return (
@@ -68,7 +68,7 @@ const AppContent = () => {
           <Route path="stories" element={<StoriesPage />} />
           <Route path="search" element={<AdvancedSearchPage />} />
           <Route path="livestream" element={<LiveStreamPage />} />
-          <Route path="settings" element={<SettingsPage onNavigateBack={() => window.history.back()} onLogout={() => {}} />} />
+          <Route path="settings" element={<SettingsPage onNavigateBack={() => window.history.back()} onLogout={logout} />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="collaboration" element={<CollaborationPage />} />
           <Route path="creator-studio" element={<CreatorStudioPage />} />
