@@ -25,8 +25,32 @@ import CreatorStudioPage from "./components/CreatorStudioPage";
 import AppLayout from "./components/AppLayout";
 import AuthPage from "./components/AuthPage";
 import StarField from "./components/StarField";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const queryClient = new QueryClient();
+
+const LogoutHandler = ({ onLogout }: { onLogout: () => Promise<void> }) => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const handleLogout = async () => {
+      await onLogout();
+      navigate('/', { replace: true });
+    };
+    handleLogout();
+  }, [onLogout, navigate]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <StarField />
+      <div className="glass-effect p-8 rounded-3xl relative z-10 flex items-center gap-3">
+        <Star className="w-8 h-8 text-accent animate-pulse" fill="currentColor" />
+        <span className="text-xl font-bold text-accent">Logging out...</span>
+      </div>
+    </div>
+  );
+};
 
 const AppContent = () => {
   const { user, loading, logout } = useUser();
@@ -72,6 +96,7 @@ const AppContent = () => {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="collaboration" element={<CollaborationPage />} />
           <Route path="creator-studio" element={<CreatorStudioPage />} />
+          <Route path="logout" element={<LogoutHandler onLogout={logout} />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
