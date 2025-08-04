@@ -172,9 +172,9 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
         isLiked: false,
         isBookmarked: false,
         author: {
-          name: 'Guest User',
-          avatar: '/placeholder.svg',
+          displayName: 'Guest User',
           username: 'guest_user',
+          avatar: '/placeholder.svg',
         },
       }));
 
@@ -440,10 +440,10 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={bit.author.avatar} />
                             <AvatarFallback className="bg-gradient-cosmic text-white text-xs">
-                              {bit.author.name.charAt(0)}
+                              {bit.author.displayName?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-white font-medium text-sm">{bit.author.name}</span>
+                          <span className="text-white font-medium text-sm">{bit.author.displayName}</span>
                           <span className="text-white/70 text-xs">@{bit.author.username}</span>
                         </div>
                         <h3 className="text-white font-semibold mb-1">{bit.title}</h3>

@@ -77,7 +77,7 @@ const VideoModal = ({ isOpen, onClose, bit }: VideoModalProps) => {
                   <Avatar className="w-10 h-10 ring-2 ring-cosmic-accent/40 hover:ring-cosmic-accent/60 transition-all">
                     <AvatarImage src={bit.author.avatar} alt={bit.author.displayName} />
                     <AvatarFallback className="bg-gradient-cosmic text-white font-semibold">
-                      {bit.author.displayName[0]}
+                      {bit.author.displayName?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
