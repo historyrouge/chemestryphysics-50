@@ -58,7 +58,7 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {bits.map((bit) => (
         <Card
           key={bit.id}
@@ -68,7 +68,7 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
           onClick={() => onBitClick(bit)}
         >
           <CardContent className="p-0">
-            <div className="relative aspect-[9/16] bg-gradient-to-br from-cosmic-purple/20 to-cosmic-blue/20 rounded-xl overflow-hidden">
+            <div className="relative aspect-[9/16] bg-gradient-to-br from-cosmic-purple/20 to-cosmic-blue/20 rounded-xl overflow-hidden min-h-[400px] max-h-[600px]">
               {/* Video Thumbnail */}
               <video
                 src={bit.videoUrl}
@@ -92,9 +92,9 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 hover:scale-110 transition-all duration-300"
+                  className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 hover:scale-110 transition-all duration-300"
                 >
-                  <Play className="w-8 h-8 ml-1" fill="currentColor" />
+                  <Play className="w-10 h-10 ml-1" fill="currentColor" />
                 </Button>
               </div>
 
