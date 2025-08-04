@@ -438,13 +438,13 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={bit.author.avatar} />
+                            <AvatarImage src={bit.author?.avatar} />
                             <AvatarFallback className="bg-gradient-cosmic text-white text-xs">
-                              {bit.author.displayName?.charAt(0) || 'U'}
+                              {bit.author?.displayName?.charAt(0) || bit.author?.username?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-white font-medium text-sm">{bit.author.displayName}</span>
-                          <span className="text-white/70 text-xs">@{bit.author.username}</span>
+                          <span className="text-white font-medium text-sm">{bit.author?.displayName || bit.author?.username || 'Unknown User'}</span>
+                          <span className="text-white/70 text-xs">@{bit.author?.username || 'unknown'}</span>
                         </div>
                         <h3 className="text-white font-semibold mb-1">{bit.title}</h3>
                         {bit.description && (
