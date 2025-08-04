@@ -28,8 +28,7 @@ import {
 } from 'lucide-react';
 import StarField from './StarField';
 import VideoModal from './VideoModal';
-import { PostCard } from '@/components/PostCard';
-import { BitCard } from '@/components/BitCard';
+import VerticalBitsSection from './VerticalBitsSection';
 import { SearchModal } from '@/components/SearchModal';
 import NotificationCenter from '@/components/NotificationCenter';
 import CreatePostModal from '@/components/CreatePostModal';
@@ -412,61 +411,28 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
                 </Card>
               ))}
 
-              {/* Bits */}
-              {bits.map((bit) => (
-                <Card key={`bit-${bit.id}`} className="glass-effect">
-                  <CardContent className="p-0">
-                    <div className="relative">
-                      <video 
-                        src={bit.videoUrl}
-                        poster={bit.thumbnail}
-                        className="w-full h-64 object-cover rounded-t-lg cursor-pointer"
-                        onClick={() => handleBitClick(bit)}
-                        muted
-                        preload="metadata"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleBitClick(bit)}
-                        className="absolute inset-0 bg-black/20 hover:bg-black/40 text-white"
-                      >
-                        <Play className="w-12 h-12" />
-                      </Button>
-                      
-                      {/* Bit overlay info */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={bit.author?.avatar} />
-                            <AvatarFallback className="bg-gradient-cosmic text-white text-xs">
-                              {bit.author?.displayName?.charAt(0) || bit.author?.username?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-white font-medium text-sm">{bit.author?.displayName || bit.author?.username || 'Unknown User'}</span>
-                          <span className="text-white/70 text-xs">@{bit.author?.username || 'unknown'}</span>
-                        </div>
-                        <h3 className="text-white font-semibold mb-1">{bit.title}</h3>
-                        {bit.description && (
-                          <p className="text-white/80 text-sm mb-2 line-clamp-2">{bit.description}</p>
-                        )}
-                        <div className="flex items-center gap-4 text-white/70 text-xs">
-                          <span className="flex items-center gap-1">
-                            <Video className="w-3 h-3" />
-                            {bit.duration}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-3 h-3" />
-                            {bit.likes}
-                          </span>
-                          <span>{bit.views} views</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
+              {/* Vertical Bits Section */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-accent flex items-center gap-2">
+                    <Video className="w-5 h-5" />
+                    Bits
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsBitUploadOpen(true)}
+                    className="text-cosmic-accent hover:text-cosmic-accent/80"
+                  >
+                    Create Bit
+                  </Button>
+                </div>
+                <VerticalBitsSection
+                  bits={bits}
+                  onBitClick={handleBitClick}
+                  loading={bitsLoading}
+                />
+              </div>
               {/* Load More */}
               {hasMorePosts && (
                 <div className="text-center py-4">

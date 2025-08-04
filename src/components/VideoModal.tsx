@@ -67,6 +67,7 @@ const VideoModal = ({ isOpen, onClose, bit }: VideoModalProps) => {
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onLoadedData={() => setIsPlaying(true)}
+              onEnded={() => setIsPlaying(false)}
             />
             
             {/* Controls Overlay */}
