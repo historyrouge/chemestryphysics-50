@@ -58,7 +58,7 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       {bits.map((bit) => (
         <Card
           key={bit.id}
@@ -68,7 +68,7 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
           onClick={() => onBitClick(bit)}
         >
           <CardContent className="p-0">
-            <div className="relative aspect-[9/16] bg-gradient-to-br from-cosmic-purple/20 to-cosmic-blue/20 rounded-xl overflow-hidden min-h-[400px] max-h-[600px]">
+            <div className="relative aspect-[9/16] bg-gradient-to-br from-cosmic-purple/20 to-cosmic-blue/20 rounded-xl overflow-hidden h-48">
               {/* Video Thumbnail */}
               <video
                 src={bit.videoUrl}
@@ -92,24 +92,24 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 hover:scale-110 transition-all duration-300"
+                  className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm text-white hover:bg-black/70 hover:scale-110 transition-all duration-300"
                 >
-                  <Play className="w-10 h-10 ml-1" fill="currentColor" />
+                  <Play className="w-6 h-6 ml-1" fill="currentColor" />
                 </Button>
               </div>
 
               {/* Duration Badge */}
-              <div className="absolute top-3 right-3">
-                <span className="bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
+              <div className="absolute top-2 right-2">
+                <span className="bg-black/70 backdrop-blur-sm text-white text-xs px-1.5 py-0.5 rounded-full">
                   {bit.duration}
                 </span>
               </div>
 
               {/* Bottom Gradient Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-2">
                 {/* Author Info */}
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar className="w-6 h-6 border border-white/20">
+                <div className="flex items-center gap-1 mb-1">
+                  <Avatar className="w-4 h-4 border border-white/20">
                     <AvatarImage src={bit.author?.avatar} />
                     <AvatarFallback className="bg-gradient-cosmic text-white text-xs">
                       {bit.author?.displayName?.charAt(0) || bit.author?.username?.charAt(0) || 'U'}
@@ -121,15 +121,15 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
                 </div>
 
                 {/* Title */}
-                <h3 className="text-white text-sm font-semibold mb-2 line-clamp-2 leading-tight">
+                <h3 className="text-white text-xs font-semibold mb-1 line-clamp-1 leading-tight">
                   {bit.title}
                 </h3>
 
                 {/* Stats */}
                 <div className="flex items-center justify-between text-white/80 text-xs">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" />
+                      <Heart className="w-2.5 h-2.5" />
                       {bit.likes}
                     </span>
                     <span>{bit.views} views</span>
@@ -138,7 +138,7 @@ const VerticalBitsSection = ({ bits, onBitClick, loading }: VerticalBitsSectionP
               </div>
 
               {/* Interaction Buttons (Right Side - Mobile Style) */}
-              <div className="absolute right-2 bottom-20 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute right-1 bottom-12 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <Button
                   variant="ghost"
                   size="icon"
