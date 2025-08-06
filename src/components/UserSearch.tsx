@@ -56,10 +56,12 @@ const UserSearch = ({ onStartChat }: UserSearchProps) => {
   };
 
   const handleFollow = async (userId: string) => {
+    console.log('Attempting to follow user with user_id:', userId);
     await followUser(userId);
   };
 
   const handleUnfollow = async (userId: string) => {
+    console.log('Attempting to unfollow user with user_id:', userId);
     await unfollowUser(userId);
   };
 

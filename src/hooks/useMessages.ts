@@ -117,6 +117,8 @@ export const useMessages = (userId?: string) => {
   const sendMessage = async (conversationId: string, content: string) => {
     if (!userId || !content.trim()) return false;
 
+    console.log('Sending message:', { conversationId, content, userId });
+
     try {
       const { error } = await supabase
         .from('messages')
@@ -127,14 +129,22 @@ export const useMessages = (userId?: string) => {
           message_type: 'text'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting message:', error);
+        throw error;
+      }
 
       // Update conversation's updated_at
-      await supabase
+      const { error: updateError } = await supabase
         .from('conversations')
         .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      if (updateError) {
+        console.error('Error updating conversation timestamp:', updateError);
+      }
+
+      console.log('Message sent successfully');
       return true;
     } catch (error) {
       console.error('Error sending message:', error);

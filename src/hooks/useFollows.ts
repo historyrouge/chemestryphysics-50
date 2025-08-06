@@ -57,6 +57,11 @@ export const useFollows = (userId?: string) => {
   const followUser = async (targetUserId: string) => {
     if (!userId) return false;
 
+    console.log('followUser called with:', { 
+      currentUserId: userId, 
+      targetUserId: targetUserId 
+    });
+
     try {
       const { error } = await supabase
         .from('follows')
@@ -65,7 +70,10 @@ export const useFollows = (userId?: string) => {
           following_id: targetUserId
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase follow error:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
