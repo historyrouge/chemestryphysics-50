@@ -51,7 +51,7 @@ export const useMessages = (userId?: string) => {
           *,
           conversation_participants!inner (
             user_id,
-            profiles (
+            profiles!conversation_participants_user_id_fkey (
               username,
               name,
               avatar_url
