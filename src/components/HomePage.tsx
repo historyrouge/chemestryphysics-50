@@ -24,7 +24,9 @@ import {
   Bookmark,
   Compass,
   Mail,
-  Loader2
+  Loader2,
+  ArrowUp,
+  Reply
 } from 'lucide-react';
 import StarField from './StarField';
 import VideoModal from './VideoModal';
@@ -35,11 +37,13 @@ import CreatePostModal from '@/components/CreatePostModal';
 import UploadOptionsMenu from '@/components/UploadOptionsMenu';
 import BitUploadModal from '@/components/BitUploadModal';
 import StoryUploadModal from '@/components/StoryUploadModal';
+import PostReplyModal from '@/components/PostReplyModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useUser } from '@/contexts/UserContext';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
@@ -81,6 +85,9 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
   const [isUploadMenuOpen, setIsUploadMenuOpen] = useState(false);
   const [isBitUploadOpen, setIsBitUploadOpen] = useState(false);
   const [isStoryUploadOpen, setIsStoryUploadOpen] = useState(false);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const handleQuickPost = async () => {
     if (quickPostText.trim()) {
@@ -114,6 +121,24 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
         break;
     }
   };
+
+  const handleReplyToPost = (post: any) => {
+    setSelectedPost(post);
+    setIsReplyModalOpen(true);
+  };
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle scroll events for scroll-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -266,54 +291,63 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
         </div>
 
         {/* Quick Post */}
-        <Card className="glass-effect mb-6">
-          <CardContent className="p-4">
-            <div className="flex gap-3">
-              <Avatar className="w-10 h-10 flex-shrink-0">
+        <Card className="glass-effect cosmic-glow border border-accent/30 mb-6">
+          <CardContent className="p-6">
+            <div className="flex gap-4">
+              <Avatar className="w-12 h-12 flex-shrink-0 ring-2 ring-accent/30">
                 <AvatarImage src={profile?.avatar_url || undefined} />
                 <AvatarFallback className="bg-gradient-cosmic text-white">
                   {profile?.name?.charAt(0) || profile?.username?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
+              <div className="flex-1 space-y-4">
                 <Textarea
                   value={quickPostText}
                   onChange={(e) => setQuickPostText(e.target.value)}
-                  placeholder="What's happening in the cosmos?"
-                  className="min-h-[80px] bg-transparent border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="✨ Share your cosmic thoughts with the universe..."
+                  className="min-h-[120px] resize-none bg-input/60 border-accent/20 focus:border-accent text-lg leading-relaxed"
                   maxLength={280}
                 />
-                <div className="flex justify-between items-center mt-3">
-                  <div className="flex gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsCreatePostOpen(true)}
-                      className="text-accent hover:text-accent/80"
+                      className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 p-2 rounded-full"
                     >
-                      <ImageIcon className="w-4 h-4" />
+                      <ImageIcon className="w-5 h-5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-accent hover:text-accent/80"
+                      className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 p-2 rounded-full"
                     >
-                      <Smile className="w-4 h-4" />
+                      <Video className="w-5 h-5" />
                     </Button>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 p-2 rounded-full"
+                    >
+                      <Smile className="w-5 h-5" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground ml-2">
                       {quickPostText.length}/280
                     </span>
-                    <Button
-                      onClick={handleQuickPost}
-                      disabled={!quickPostText.trim()}
-                      size="sm"
-                      variant="cosmic"
-                    >
-                      Post
-                    </Button>
                   </div>
+                  <Button
+                    onClick={handleQuickPost}
+                    disabled={!quickPostText.trim()}
+                    size="lg"
+                    variant="cosmic"
+                    className="px-8 py-2 text-base font-semibold"
+                  >
+                    Share to Universe ✨
+                  </Button>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Your post will be visible to explorers across the cosmic network 🌍
                 </div>
               </div>
             </div>
@@ -331,78 +365,98 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
             <>
               {/* Posts */}
               {posts.map((post) => (
-                <Card key={`post-${post.id}`} className="glass-effect">
-                  <CardContent className="p-4">
-                    <div className="flex gap-3">
-                      <Avatar className="w-10 h-10 flex-shrink-0">
+                <Card key={`post-${post.id}`} className="glass-effect cosmic-glow hover-lift transition-all duration-300 border border-accent/20 hover:border-accent/40">
+                  <CardContent className="p-6">
+                    <div className="flex gap-4">
+                      <Avatar className="w-12 h-12 flex-shrink-0 ring-2 ring-accent/30">
                         <AvatarImage src={post.profiles?.avatar_url || undefined} />
                         <AvatarFallback className="bg-gradient-cosmic text-white">
                           {post.profiles?.name?.charAt(0) || post.profiles?.username?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-semibold text-accent">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="font-bold text-accent hover:text-accent/80 cursor-pointer">
                             {post.profiles?.name || post.profiles?.username}
                           </span>
+                          {post.profiles?.verified && (
+                            <Verified className="w-4 h-4 text-blue-400 fill-current" />
+                          )}
                           <span className="text-sm text-muted-foreground">
                             @{post.profiles?.username}
                           </span>
                           <span className="text-sm text-muted-foreground">·</span>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-muted-foreground hover:text-accent cursor-pointer">
                             {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                           </span>
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            Public
+                          </Badge>
                         </div>
                         
-                        <p className="text-foreground mb-3 whitespace-pre-wrap">
+                        <div 
+                          className="text-foreground leading-relaxed whitespace-pre-wrap cursor-pointer hover:text-accent/90 transition-colors"
+                          onClick={() => handleReplyToPost(post)}
+                        >
                           {post.content}
-                        </p>
+                        </div>
                         
                         {post.image_url && (
-                          <div className="mb-3">
+                          <div className="my-4">
                             <img
                               src={post.image_url}
                               alt="Post content"
-                              className="w-full rounded-lg max-h-96 object-cover"
+                              className="w-full rounded-xl max-h-96 object-cover border border-accent/20 hover:border-accent/40 transition-colors cursor-pointer"
+                              onClick={() => handleReplyToPost(post)}
                             />
                           </div>
                         )}
                         
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between pt-2 border-t border-accent/10">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-accent"
+                            onClick={() => handleReplyToPost(post)}
+                            className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 flex items-center gap-2 px-3 py-2 rounded-full"
                           >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            0
+                            <Reply className="w-4 h-4" />
+                            <span className="text-sm font-medium">Reply</span>
                           </Button>
                           
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-green-500"
+                            className="text-muted-foreground hover:text-green-500 hover:bg-green-500/10 transition-all duration-200 flex items-center gap-2 px-3 py-2 rounded-full"
                           >
-                            <Repeat className="w-4 h-4 mr-1" />
-                            0
+                            <Repeat className="w-4 h-4" />
+                            <span className="text-sm font-medium">0</span>
                           </Button>
                           
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => toggleLike(post.id)}
-                            className={`${post.is_liked ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
+                            className={`${post.is_liked ? 'text-red-500 bg-red-500/10' : 'text-muted-foreground hover:text-red-500 hover:bg-red-500/10'} transition-all duration-200 flex items-center gap-2 px-3 py-2 rounded-full`}
                           >
-                            <Heart className={`w-4 h-4 mr-1 ${post.is_liked ? 'fill-current' : ''}`} />
-                            0
+                            <Heart className={`w-4 h-4 ${post.is_liked ? 'fill-current' : ''}`} />
+                            <span className="text-sm font-medium">{post.likes_count || 0}</span>
                           </Button>
                           
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-accent"
+                            className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 flex items-center gap-2 px-3 py-2 rounded-full"
                           >
                             <Share className="w-4 h-4" />
+                            <span className="text-sm font-medium">Share</span>
+                          </Button>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all duration-200 p-2 rounded-full"
+                          >
+                            <Bookmark className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -482,6 +536,16 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
         <Plus className="w-6 h-6" />
       </Button>
 
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={handleScrollToTop}
+          className="fixed bottom-32 right-4 w-12 h-12 rounded-full bg-gradient-cosmic hover:shadow-glow-primary z-40 animate-fade-in"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </Button>
+      )}
+
       {/* Modals */}
       <UploadOptionsMenu
         isOpen={isUploadMenuOpen}
@@ -492,6 +556,12 @@ const HomePage = ({ onLogout, onNavigate, onOpenUpload }: HomePageProps) => {
       <CreatePostModal
         isOpen={isCreatePostOpen}
         onClose={() => setIsCreatePostOpen(false)}
+      />
+
+      <PostReplyModal
+        isOpen={isReplyModalOpen}
+        onClose={() => setIsReplyModalOpen(false)}
+        post={selectedPost}
       />
 
       <BitUploadModal

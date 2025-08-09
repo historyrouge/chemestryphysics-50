@@ -27,6 +27,7 @@ import AuthPage from "./components/AuthPage";
 import StarField from "./components/StarField";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useInitialData } from "./hooks/useInitialData";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,9 @@ const LogoutHandler = ({ onLogout }: { onLogout: () => Promise<void> }) => {
 
 const AppContent = () => {
   const { user, loading, logout } = useUser();
+  
+  // Initialize sample data for demo
+  useInitialData();
 
   if (loading) {
     return (
