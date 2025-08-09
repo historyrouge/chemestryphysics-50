@@ -1,7 +1,8 @@
-import { ArrowLeft, Search, MoreHorizontal, Send, UserPlus, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Search, MoreHorizontal, Send, UserPlus, MessageCircle, Smile } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,9 +58,15 @@ const MessagesPage = ({ onNavigateBack }: MessagesPageProps) => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // Allow new line with Shift+Enter
+        return;
+      } else {
+        // Send message with Enter
+        e.preventDefault();
+        handleSendMessage();
+      }
     }
   };
 
@@ -187,31 +194,37 @@ const MessagesPage = ({ onNavigateBack }: MessagesPageProps) => {
                           <div
                             key={conversation.id}
                             onClick={() => setSelectedConversation(conversation.id)}
-                            className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                            className={`p-4 rounded-xl cursor-pointer transition-all duration-200 border ${
                               selectedConversation === conversation.id 
-                                ? 'bg-accent/20' 
-                                : 'hover:bg-accent/10'
+                                ? 'bg-accent/20 border-accent/40' 
+                                : 'hover:bg-accent/10 border-transparent hover:border-accent/20'
                             }`}
                           >
                             <div className="flex gap-3">
-                              <Avatar className="w-12 h-12">
-                                <AvatarImage src={avatar} />
-                                <AvatarFallback className="bg-gradient-cosmic text-white">
-                                  {displayName.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
+                              <div className="relative">
+                                <Avatar className="w-12 h-12 ring-2 ring-accent/20">
+                                  <AvatarImage src={avatar} />
+                                  <AvatarFallback className="bg-gradient-cosmic text-white">
+                                    {displayName.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-background rounded-full"></div>
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-1">
-                                  <h3 className="font-semibold truncate">{displayName}</h3>
+                                  <h3 className="font-semibold truncate text-accent">{displayName}</h3>
                                   {conversation.lastMessage && (
                                     <span className="text-xs text-muted-foreground">
                                       {formatTime(conversation.lastMessage.created_at)}
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground truncate">
-                                  {conversation.lastMessage?.content || 'No messages yet'}
+                                <p className="text-sm text-muted-foreground truncate leading-relaxed">
+                                  {conversation.lastMessage?.content || 'Say hello! 👋'}
                                 </p>
+                                {!conversation.lastMessage?.is_read && conversation.lastMessage?.sender_id !== user?.id && (
+                                  <div className="w-2 h-2 bg-accent rounded-full mt-1"></div>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -233,36 +246,78 @@ const MessagesPage = ({ onNavigateBack }: MessagesPageProps) => {
             {selectedConversation ? (
               <>
                 {/* Messages */}
-                <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-xs px-4 py-2 rounded-2xl ${
-                        message.sender_id === user?.id 
-                          ? 'bg-accent text-accent-foreground' 
-                          : 'bg-muted'
-                      }`}>
-                        <p className="text-sm">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">{formatTime(message.created_at)}</p>
+                <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                  {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center space-y-2">
+                        <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground" />
+                        <p className="text-muted-foreground">No messages yet</p>
+                        <p className="text-sm text-muted-foreground">Start the conversation!</p>
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'} group`}
+                      >
+                        <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl transition-all duration-200 ${
+                          message.sender_id === user?.id 
+                            ? 'bg-gradient-cosmic text-white shadow-lg' 
+                            : 'bg-muted/80 hover:bg-muted border border-accent/10'
+                        }`}>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                          <div className={`flex items-center justify-between mt-2 ${
+                            message.sender_id === user?.id ? 'text-white/70' : 'text-muted-foreground'
+                          }`}>
+                            <p className="text-xs">{formatTime(message.created_at)}</p>
+                            {message.sender_id === user?.id && (
+                              <span className="text-xs">
+                                {message.is_read ? '✓✓' : '✓'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message Input */}
-                <div className="p-4 border-t border-border">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type a message..."
-                      className="flex-1 bg-input/50 border-border"
-                      onKeyPress={handleKeyPress}
-                    />
-                    <Button onClick={handleSendMessage} size="icon" disabled={!newMessage.trim()}>
+                <div className="p-4 border-t border-border bg-background/50">
+                  <div className="flex gap-3 items-end">
+                    <div className="flex-1 space-y-2">
+                      <Textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type a message..."
+                        className="min-h-[40px] max-h-32 bg-input/80 border-accent/20 focus:border-accent resize-none"
+                        onKeyDown={handleKeyPress}
+                        rows={1}
+                      />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground hover:text-accent p-1.5"
+                          >
+                            <Smile className="w-4 h-4" />
+                          </Button>
+                          <span className="text-xs text-muted-foreground">
+                            {newMessage.length}/1000
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleSendMessage} 
+                      disabled={!newMessage.trim()}
+                      variant="cosmic"
+                      size="icon"
+                      className="mb-1"
+                    >
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>

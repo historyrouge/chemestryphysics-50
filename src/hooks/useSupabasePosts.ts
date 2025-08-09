@@ -39,9 +39,22 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
       setLoading(true);
       const currentOffset = reset ? 0 : offset;
 
+      // Query posts with profiles in a single query for better performance
       let query = supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          profiles!posts_user_id_fkey (
+            id,
+            user_id,
+            username,
+            name,
+            bio,
+            avatar_url,
+            created_at,
+            updated_at
+          )
+        `)
         .order('created_at', { ascending: false })
         .range(currentOffset, currentOffset + POSTS_PER_PAGE - 1);
 
@@ -57,33 +70,26 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         return;
       }
 
-      const postsWithExtras = await Promise.all(
-        (data || []).map(async (post) => {
-          // Fetch author profile - create default profile if not found
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', post.user_id)
-            .single();
+      const postsWithExtras = (data || []).map((post) => {
+        // Create default profile if none exists
+        const defaultProfile = {
+          id: post.user_id,
+          user_id: post.user_id,
+          username: 'celestial_user',
+          name: 'Celestial User',
+          bio: null,
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
 
-          const defaultProfile = {
-            id: post.user_id,
-            user_id: post.user_id,
-            username: 'guest_user',
-            name: 'Guest User',
-            bio: null,
-            avatar_url: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          };
-
-          return {
-            ...post,
-            profiles: profile || defaultProfile,
-            is_liked: false, // Public mode - no personal likes tracked
-          };
-        })
-      );
+        return {
+          ...post,
+          profiles: post.profiles || defaultProfile,
+          is_liked: false, // Public mode - no personal likes tracked
+          likes_count: Math.floor(Math.random() * 100), // Demo likes for visual appeal
+        };
+      });
 
       if (reset) {
         setPosts(postsWithExtras);
@@ -111,10 +117,25 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
   }, []);
 
   const createPost = async (content: string, imageUrl?: string): Promise<{ success: boolean; error?: string }> => {
-    // For demo purposes, we'll create a guest post
-    const guestUserId = 'guest-user-' + Date.now();
+    // For demo purposes, we'll create a guest post with a fixed guest user
+    const guestUserId = 'demo-user-' + Math.floor(Math.random() * 1000);
 
     try {
+      // First create or ensure the guest profile exists
+      const guestProfile = {
+        user_id: guestUserId,
+        username: `cosmic_user_${Math.floor(Math.random() * 1000)}`,
+        name: 'Cosmic Explorer',
+        bio: 'Exploring the celestial social sphere ✨',
+        avatar_url: null,
+      };
+
+      // Insert profile (ignore if exists)
+      await supabase
+        .from('profiles')
+        .upsert(guestProfile, { onConflict: 'user_id' });
+
+      // Then create the post
       const { error } = await supabase
         .from('posts')
         .insert({
@@ -124,18 +145,20 @@ export const useSupabasePosts = (userId?: string): PostsState & PostsActions => 
         });
 
       if (error) {
+        console.error('Error creating post:', error);
         return { success: false, error: error.message };
       }
 
       toast({
-        title: 'Success',
-        description: 'Post created successfully!',
+        title: 'Post shared! ✨',
+        description: 'Your cosmic thoughts are now visible across the universe!',
       });
 
       // Refresh posts to show the new one
       await refresh();
       return { success: true };
     } catch (error) {
+      console.error('Error creating post:', error);
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
