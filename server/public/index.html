@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>mini-vercel</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+      h1 { margin-bottom: 8px; }
+      .card { border: 1px solid #e5e7eb; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+      input, button { padding: 8px 12px; margin-right: 8px; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
+    </style>
+  </head>
+  <body>
+    <h1>mini-vercel</h1>
+    <p>Create a project from a Git repo, then trigger a deployment.</p>
+
+    <div class="card">
+      <h3>Create Project</h3>
+      <input id="proj-name" placeholder="Project name" />
+      <input id="proj-repo" placeholder="Git URL (https:// or git@)" size="50" />
+      <button id="create-project">Create</button>
+      <div id="create-project-msg"></div>
+    </div>
+
+    <div class="card">
+      <h3>Projects</h3>
+      <div id="projects"></div>
+    </div>
+
+    <div class="card">
+      <h3>Deployments</h3>
+      <div id="deployments"></div>
+    </div>
+
+    <script>
+      async function fetchJson(url, opts) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      }
+
+      async function loadProjects() {
+        const { projects } = await fetchJson('/api/projects');
+        const el = document.getElementById('projects');
+        if (!projects.length) { el.innerHTML = '<p>No projects yet.</p>'; return; }
+        el.innerHTML = `<table><thead><tr><th>Name</th><th>Repo</th><th>Actions</th></tr></thead><tbody>
+          ${projects.map(p => `<tr><td>${p.name}</td><td><code>${p.repoUrl}</code></td><td><button data-pid="${p.id}" class="deploy">Deploy</button></td></tr>`).join('')}
+        </tbody></table>`;
+        el.querySelectorAll('.deploy').forEach(btn => btn.addEventListener('click', async () => {
+          const projectId = btn.getAttribute('data-pid');
+          await fetchJson('/api/deployments', { method: 'POST', body: JSON.stringify({ projectId }) });
+          await loadDeployments();
+        }));
+      }
+
+      async function loadDeployments() {
+        const { deployments } = await fetchJson('/api/deployments');
+        const el = document.getElementById('deployments');
+        if (!deployments.length) { el.innerHTML = '<p>No deployments yet.</p>'; return; }
+        el.innerHTML = `<table><thead><tr><th>ID</th><th>Project</th><th>Status</th><th>URL</th></tr></thead><tbody>
+          ${deployments.slice().reverse().map(d => `<tr><td><code>${d.id}</code></td><td><code>${d.projectId}</code></td><td>${d.status}</td><td>${d.status === 'ready' ? `<a href="/d/${d.id}" target="_blank">/d/${d.id}</a>` : ''}</td></tr>`).join('')}
+        </tbody></table>`;
+      }
+
+      document.getElementById('create-project').addEventListener('click', async () => {
+        const name = document.getElementById('proj-name').value.trim();
+        const repoUrl = document.getElementById('proj-repo').value.trim();
+        const msg = document.getElementById('create-project-msg');
+        msg.textContent = '';
+        try {
+          await fetchJson('/api/projects', { method: 'POST', body: JSON.stringify({ name, repoUrl }) });
+          msg.textContent = 'Created!';
+          await loadProjects();
+        } catch (e) {
+          msg.textContent = e.message;
+        }
+      });
+
+      loadProjects();
+      loadDeployments();
+      setInterval(loadDeployments, 4000);
+    </script>
+  </body>
+  </html>
+
