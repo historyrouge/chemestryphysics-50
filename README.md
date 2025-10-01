@@ -1,186 +1,209 @@
-# 🌌 Celestial v1.0.0 - Social Media Universe
+# Vercel Clone
 
-A complete, production-ready social media platform built with React, TypeScript, and Supabase. Experience cosmic interactions with real-time updates, comprehensive social features, and a stunning space-themed design. **Ready for Play Store deployment!**
+A modern deployment platform for static sites and serverless functions, inspired by Vercel. Built with Next.js, Node.js, and Express.
 
-## ✨ Features
+## Features
 
-### 🔐 Enhanced Authentication System
-- **Secure Login/Signup** with email verification
-- **Real-time session management** with automatic profile creation
-- **Password reset functionality** 
-- **Username validation** to prevent duplicates
-- **Persistent sessions** across browser restarts
+- 🚀 **Instant Deployments** - Deploy your projects in seconds
+- 🌐 **Global CDN** - Fast content delivery worldwide
+- 🔒 **Secure by Default** - Automatic HTTPS and security headers
+- ⚡ **Serverless Functions** - Deploy and scale serverless functions
+- 📱 **Modern UI** - Beautiful, responsive dashboard
+- 🔐 **Authentication** - Secure user authentication and authorization
+- 📊 **Analytics** - Track your deployments and performance
+- 🎯 **Custom Domains** - Use your own domain names
+- 🔄 **Git Integration** - Automatic deployments from Git repositories
 
-### 📱 Real-time Social Features
-- **Live post updates** - See new posts instantly without refreshing
-- **Real-time like synchronization** across all connected users
-- **Live comment notifications** and updates
-- **Instant interaction feedback** with optimistic UI updates
+## Tech Stack
 
-### 💬 Advanced Comment System
-- **Threaded conversations** with up to 3 levels of nesting
-- **Comment likes and reactions** with real-time counts
-- **Reply to specific comments** with visual threading
-- **Comment deletion** for comment authors
-- **Load more pagination** for large comment threads
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Smooth animations
+- **Lucide React** - Beautiful icons
+- **React Hook Form** - Form handling
+- **Axios** - HTTP client
 
-### 🎨 Content Creation & Management
-- **Rich post creation modal** with:
-  - Image upload support (up to 5MB)
-  - Hashtag management system
-  - Character count limits (500 chars)
-  - Image preview before posting
-- **Quick post composer** in the main feed
-- **Post deletion** for post authors
-- **Content moderation** ready structure
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web framework
+- **JWT** - Authentication tokens
+- **Multer** - File upload handling
+- **Bcrypt** - Password hashing
+- **CORS** - Cross-origin resource sharing
+- **Helmet** - Security headers
 
-### ⚡ Advanced Interactions
-- **Multiple reaction types** (coming soon - emoji reactions)
-- **Smart bookmarking system** with personal collections
-- **Native sharing** with Web Share API fallback
-- **Infinite scroll** for seamless content browsing
-- **Optimistic UI updates** for instant feedback
-
-### 🗃️ Data Management
-- **Supabase integration** replacing all mock data
-- **Row Level Security (RLS)** for data protection
-- **Real-time subscriptions** for live updates
-- **Efficient pagination** with cursor-based loading
-- **Automatic profile creation** on user signup
-
-### 📊 Database Schema
-```sql
-- profiles (user information)
-- posts (main content)
-- post_likes (like tracking)
-- comments (threaded comments)
-- comment_likes (comment reactions)
-- stories (24h temporary content)
-- reactions (emoji reactions)
-- bookmarks (saved content)
-- follows (user relationships)
-- messages (direct messaging)
-```
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ 
 - npm or yarn
-- Supabase account
 
-### Environment Setup
-1. Clone the repository
-```bash
-git clone <repository-url>
-cd celestial-social-sphere
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd vercel-clone
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm run install:all
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp backend/.env.example backend/.env
+   # Edit backend/.env with your configuration
+   ```
+
+4. **Start the development servers**
+   ```bash
+   npm run dev
+   ```
+
+This will start:
+- Frontend on http://localhost:3000
+- Backend on http://localhost:3001
+
+### Project Structure
+
+```
+vercel-clone/
+├── frontend/                 # Next.js frontend application
+│   ├── src/
+│   │   ├── app/             # App Router pages
+│   │   │   ├── dashboard/   # Dashboard pages
+│   │   │   ├── login/       # Authentication pages
+│   │   │   └── signup/
+│   │   └── components/      # Reusable components
+│   ├── public/              # Static assets
+│   └── package.json
+├── backend/                 # Express.js backend API
+│   ├── src/
+│   │   ├── routes/          # API route handlers
+│   │   │   ├── auth.js      # Authentication routes
+│   │   │   ├── projects.js  # Project management
+│   │   │   └── deployments.js # Deployment management
+│   │   └── index.js         # Main server file
+│   ├── uploads/             # File upload storage
+│   ├── deployments/         # Deployed project files
+│   └── package.json
+└── README.md
 ```
 
-2. Install dependencies
-```bash
-npm install
-```
+## API Endpoints
 
-3. Set up your Supabase project:
-   - Create a new project at [supabase.com](https://supabase.com)
-   - Run the migration file: `supabase/migrations/001_initial_schema.sql`
-   - Update your Supabase URL and anon key in `src/integrations/supabase/client.ts`
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user
 
-4. Start the development server
+### Projects
+- `GET /api/projects` - Get user projects
+- `POST /api/projects` - Create new project
+- `GET /api/projects/:id` - Get project details
+- `PUT /api/projects/:id` - Update project
+- `DELETE /api/projects/:id` - Delete project
+- `POST /api/projects/:id/upload` - Upload project files
+- `GET /api/projects/:id/download` - Download project as ZIP
+
+### Deployments
+- `GET /api/deployments` - Get user deployments
+- `POST /api/deployments` - Create new deployment
+- `GET /api/deployments/:id` - Get deployment details
+- `GET /api/deployments/:id/logs` - Get deployment logs
+- `POST /api/deployments/:id/cancel` - Cancel deployment
+- `POST /api/deployments/:id/redeploy` - Redeploy project
+- `DELETE /api/deployments/:id` - Delete deployment
+
+## Usage
+
+1. **Sign Up** - Create a new account
+2. **Create Project** - Add a new project to your dashboard
+3. **Upload Files** - Upload your project files
+4. **Deploy** - Deploy your project with one click
+5. **Monitor** - Track deployment status and logs
+6. **Share** - Get a public URL for your deployed project
+
+## Development
+
+### Frontend Development
 ```bash
+cd frontend
 npm run dev
 ```
 
-## 🏗️ Architecture
+### Backend Development
+```bash
+cd backend
+npm run dev
+```
 
-### Frontend Stack
-- **React 18** with TypeScript
-- **Vite** for fast development and building
-- **TailwindCSS** for styling with custom cosmic theme
-- **Radix UI** components for accessibility
-- **React Query** for server state management
-- **Zustand** for client state management
-- **React Router** for navigation
+### Building for Production
+```bash
+npm run build
+npm start
+```
 
-### Backend & Database
-- **Supabase** for backend services
-- **PostgreSQL** with advanced features
-- **Row Level Security** for data protection
-- **Real-time subscriptions** for live updates
-- **Triggers and functions** for automation
+## Deployment
 
-### Key Patterns
-- **Custom Hooks** for data fetching and state management
-- **Context API** for global authentication state
-- **Real-time subscriptions** using Supabase channels
-- **Optimistic updates** for better UX
-- **Error boundaries** for graceful error handling
+### Frontend (Vercel)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables
+3. Deploy automatically on push
 
-## 🔧 Custom Hooks
+### Backend (Railway/Heroku)
+1. Connect your repository
+2. Set environment variables
+3. Deploy with one click
 
-### `useSupabaseAuth`
-Handles all authentication operations with automatic profile management.
+## Environment Variables
 
-### `useSupabasePosts` 
-Manages posts with real-time updates, infinite scrolling, and optimistic UI.
+### Frontend
+- `NEXT_PUBLIC_API_URL` - Backend API URL
 
-### `useComments`
-Provides threaded comment system with real-time updates and pagination.
+### Backend
+- `PORT` - Server port (default: 3001)
+- `JWT_SECRET` - JWT signing secret
+- `FRONTEND_URL` - Frontend URL for CORS
+- `NODE_ENV` - Environment (development/production)
 
-## 🎯 Real-time Features
+## Contributing
 
-The app uses Supabase's real-time capabilities to provide live updates:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-- **Posts**: New posts appear instantly across all connected clients
-- **Likes**: Like counts update in real-time for all users viewing a post
-- **Comments**: New comments and replies appear immediately
-- **User Status**: Online/offline status and activity indicators
+## License
 
-## 🔒 Security Features
+MIT License - see LICENSE file for details
 
-- **Row Level Security (RLS)** on all database tables
-- **User authentication** required for all write operations
-- **Content ownership verification** before allowing modifications
-- **Input validation** and sanitization
-- **Rate limiting** ready infrastructure
+## Roadmap
 
-## 📱 Mobile Optimization
+- [ ] Database integration (PostgreSQL/MongoDB)
+- [ ] Real file storage (AWS S3/Cloudinary)
+- [ ] Git integration (GitHub/GitLab)
+- [ ] Custom domain support
+- [ ] SSL certificate automation
+- [ ] Analytics dashboard
+- [ ] Team collaboration
+- [ ] Environment variables management
+- [ ] Serverless functions support
+- [ ] Edge functions
+- [ ] Performance monitoring
+- [ ] Error tracking
+- [ ] CI/CD pipelines
 
-- **Responsive design** works perfectly on all device sizes
-- **Touch-friendly interactions** with proper tap targets
-- **Mobile-first approach** with progressive enhancement
-- **Offline-ready** structure for future PWA features
+## Support
 
-## 🎨 UI/UX Features
-
-- **Dark theme** with cosmic-inspired design
-- **Smooth animations** and transitions
-- **Loading states** for all async operations
-- **Empty states** with helpful messaging
-- **Error handling** with user-friendly messages
-- **Accessibility** features with proper ARIA labels
-
-## 🔮 Future Enhancements
-
-- [ ] **Stories feature** with 24-hour expiration
-- [ ] **Direct messaging** system
-- [ ] **Advanced search** with filters
-- [ ] **User verification** system
-- [ ] **Content collections** and saved posts
-- [ ] **Push notifications** for mobile
-- [ ] **Video uploads** and streaming
-- [ ] **Live streaming** capabilities
-- [ ] **AI-powered content moderation**
-- [ ] **Analytics dashboard** for creators
-
-## 🤝 Contributing
-
-This project welcomes contributions! Please see the contributing guidelines for more information.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+For support, email support@vercel-clone.com or create an issue on GitHub.
 
 ---
 
-Built with ❤️ using modern web technologies for the next generation of social media.
+Built with ❤️ using Next.js and Node.js
